@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Interfacing with JUCE synth plugins in Unity | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Interfacing with JUCE synth plugins in Unity</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/synth-unity.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Interfacing with JUCE synth plugins in Unity</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="19-03-2023">19-03-2023</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h2 id="introduction">Introduction</h2>
+<p>Integrating JUCE audio plugins into Unity has never been easier thanks to JUCE's native support for exporting plugins as Unity plugins. However, the Unity plugin API has a limitation - it is primarily geared towards sound effects.</p>
+<p><img src="img/tapsynth.webp" class="img-fluid" alt="" /></p>
+<p>Although synth plugins can be loaded as well, it is not a trivial task to make them work properly. Their parameters can be accessed via the Unity C# API, but handling note messages and other features requires calling native code, which can seem daunting at first.</p>
+<p>In this article, I will demonstrate how to use JUCE synths in Unity. We will dive into managing note on and off messages from a MonoBehaviour and provide example code that demonstrates how to add support for other arbitrary features.</p>
+<h2 id="a-generic-wrapper-for-synth-plugins">A generic wrapper for synth plugins</h2>
+<p>I've created a JUCE user module that can help you get started with integrating your synth plugin with your Unity application. You can find the source code <a href="https://github.com/playfultones/playfultones_unitysynth" target="_blank" rel="noopener noreferrer">here</a>. Add this to your plugin project and connect it to your plugin processor class following these steps:</p>
+<ol>
+<li>Add a <code>juce::MidiKeyboardState</code> member to your processor, if you don't already have one.</li>
+<li>Implement the <code>juce::MidiKeyboardState::Listener</code> interface in your processor.</li>
+<li>Add the processor as a listener to your keyboard state object in the processor's constructor.</li>
+<li>Do what you need to do in the <code>handleNoteOn</code> and <code>handleNoteOff</code> callback methods to handle which notes are played by your synth. If you use the <code>juce::Synthesiser</code> class internally for your own audio processing, you can simply call <code>mySynth.noteOn()</code> and <code>mySynth.noteOff()</code> from these methods.</li>
+<li>Implement the <code>playfultones::UnitySynth</code> interface in your processor.</li>
+<li>Pass the keyboard state object to the <code>UnitySynth</code> base constructor from your processor's constructor.</li>
+<li>Call <code>playfultones::UnitySynth::initialize();</code> in your processor's <code>prepareToPlay</code> method. It doesn't matter where inside the method it is called.</li>
+</ol>
+<p>That's all! Now build your synth as a Unity plugin, and copy the generated .bundle (on Windows: .dll) file to a folder called <code>Plugins</code> inside the <code>Assets</code> folder of your Unity project.</p>
+<p>You can find an example synth project that utilizes this module <a href="https://github.com/playfultones/DemoSynthPlugin" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<p>This sums up all the steps that were necessary to take to prepare your JUCE project. In the next section, we'll look at how the boilerplate code looks like on the managed side.</p>
+<h2 id="writing-the-c-counterpart-of-the-wrapper-class">Writing the C# counterpart of the wrapper class</h2>
+<p>The JUCE user module discussed in the previous section contained a couple of global methods that are compiled with C linkage. We'll access these methods from C# using a wrapper class that is created in the following way:</p>
+<ol>
+<li>Place a new <code>.cs</code> file in your <code>Plugins</code> folder (next to the compiled synth plugin binaries) and call it something like <code>MySynth.cs</code>.</li>
+<li>Add the following code:</li>
+</ol>
+<pre><code class="language-C#">using System;
+using System.Runtime.InteropServices;
+
+public static class MySynth
+{
+#if UNITY_IPHONE
+    [DllImport (&quot;__Internal&quot;)]
+#else
+    [DllImport (&quot;audioplugin_mySynth.bundle&quot;)]
+#endif
+    private static extern IntPtr getInstance();
+
+
+#if UNITY_IPHONE
+    [DllImport (&quot;__Internal&quot;)]
+#else
+    [DllImport (&quot;audioplugin_mySynth.bundle&quot;)]
+#endif
+    public static extern void noteOn(IntPtr ptr, int note, float velocity);
+    public static void noteOn(int note, float velo)
+    {
+        if(getInstance() != IntPtr.Zero)
+            noteOn(getInstance(), note, velo);
+    }
+
+#if UNITY_IPHONE
+    [DllImport (&quot;__Internal&quot;)]
+#else
+    [DllImport(&quot;audioplugin_mySynth.bundle&quot;)]
+#endif
+    public static extern void noteOff(IntPtr ptr, int note);
+    public static void noteOff(int note)
+    {
+        if (getInstance() != IntPtr.Zero)
+            noteOff(getInstance(), note);
+    }
+}
+</code></pre>
+<ol start="3">
+<li>Change all occurrences of <code>audioplugin_mySynth.bundle</code> to the name of your plugin binaries. If you're working on a multi-platform app, you might want to add an extra preprocessor condition for branching over Windows/macOS/etc. platforms with different binaries.</li>
+</ol>
+<p>You are now ready to load the synth in your mixer. Call <code>MySynth.noteOn()</code> and <code>MySynth.noteOff()</code> from any MonoBehaviour. As long as your mixer is active and has the synth loaded, you should hear audio playback when you send note on messages to the plugin.</p>
+<p>You can find an example Unity project that demonstrates this <a href="https://github.com/playfultones/DemoUnityApp" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>This article provided an overview on how arbitrary method calls in the plugin processor can be integrated with MonoBehaviour scripts. As long as you add the same method signatures in the wrapper module in JUCE and the wrapper class in C#, you should be able to extend it with additional features (e.g. changing parameters, managing presets etc.).</p>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>

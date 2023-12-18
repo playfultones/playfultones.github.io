@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1 | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/adc2025talk.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="02-12-2025">02-12-2025</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h2 id="introduction">Introduction</h2>
+<p>These are the extended notes from my ADC 2025 talk in Bristol. The talk covered the UI production pipeline we built at Bogren Digital, and I got some good questions afterward. &quot;Pixel-perfect&quot; is admittedly a loaded term, and there's a lot that goes into actually achieving it. But if you've struggled with UI implementation in JUCE and want to see how we addressed some common pain points, this should be useful.</p>
+<h3 id="table-of-contents">Table of Contents</h3>
+<ul>
+<li><a href="#introduction">Introduction</a>
+<ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+</ul>
+</li>
+<li><a href="#overview-of-our-workflow">Overview of Our Workflow</a>
+<ul>
+<li><a href="#how-it-used-to-work">How It Used to Work</a></li>
+<li><a href="#how-it-works-now">How It Works Now</a></li>
+</ul>
+</li>
+<li><a href="#dynamic-ui-layout-implementation">Dynamic UI Layout Implementation</a>
+<ul>
+<li><a href="#exporting-images-from-photoshop">Exporting Images from Photoshop</a></li>
+<li><a href="#a-new-feature-defining-hitboxes-in-photoshop">A New Feature: Defining Hitboxes in Photoshop</a></li>
+<li><a href="#generating-the-layout-definition">Generating the Layout Definition</a></li>
+<li><a href="#using-the-ui-loader">Using the UI Loader</a></li>
+<li><a href="#tangent-mcp-based-figma-integration-with-llms">Tangent: MCP-based Figma Integration With LLMs</a></li>
+<li><a href="#specializing-the-ui-loader-for-various-image-types">Specializing the UI Loader for Various Image Types</a></li>
+</ul>
+</li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#glossary">Glossary</a></li>
+</ul>
+<h2 id="overview-of-our-workflow">Overview of Our Workflow</h2>
+<p>I'll start with the high-level picture, then dig into each piece.</p>
+<p>We use JUCE's native renderer. No web views, no custom renderers. The code examples reflect that. A lot of the pipeline thinking here applies regardless of your rendering approach.</p>
+<p>Some terms we use internally appear in <strong>bold</strong>. See the <a href="#glossary">glossary</a> at the end if anything's unclear. The original slides are <a href="https://docs.google.com/presentation/d/1Z91UuA1wCUi3zR9ylCIkjqZXBWPViMn8wDHYC034nqs/view" target="_blank" rel="noopener noreferrer">here</a>. All the code modules we released are listed <a href="https://github.com/Bogren-Digital/PSD-to-DAW" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h3 id="how-it-used-to-work">How It Used to Work</h3>
+<p>Our original workflow was painful:</p>
+<ul>
+<li>Graphic Designer sends a zip file full of individual frames. Just a flat list of images for every component.</li>
+<li>We manually assembled them into an <strong>Assembly PSD</strong> and derived a <strong>Reference Image</strong>.</li>
+<li>Layout was hard-coded. In <code>resized()</code>, we'd write things like this:</li>
+</ul>
+<pre><code class="language-cpp">mainGainSlider.setBoundsFloatFromRect (getRectFromBitmap (1653, 635, 600, 600)); // Magic numbers from Photoshop
+</code></pre>
+<ul>
+<li>We'd eyeball the window and tweak positions using <code>JUCE_LIVE_CONSTANT</code>. <a href="https://docs.google.com/presentation/d/1Z91UuA1wCUi3zR9ylCIkjqZXBWPViMn8wDHYC034nqs/view?slide=id.g36cc6e2ec38_6_1#slide=id.g36cc6e2ec38_6_1" target="_blank" rel="noopener noreferrer">Here's what that looks like.</a></li>
+<li>To compare implementation against the reference, we used <a href="https://github.com/Bogren-Digital/bd_splitview" target="_blank" rel="noopener noreferrer">SplitView</a>.</li>
+</ul>
+<p>We bake images into the binary. Users shouldn't have to worry about external asset folders when moving their setup between machines. One image set keeps the app size reasonable.</p>
+<p>We also support smooth, continuous window resizing. No stepped increments. That means runtime resampling. JUCE's built-in resampling tends toward blurry results, so we started doing our own. We'd call <code>drawImageAt()</code> (which doesn't apply any filtering) with pre-resampled bitmaps using Lanczos. Lanczos is great for downscaling photorealistic content, but push it too far and you get ringing artifacts around hard edges. Not ideal.</p>
+<p>Z-ordering was another headache. JUCE's default behavior is that components get stacked in the order you add them. This falls apart when you have a base class that sets up the main layout and a derived class that adds plugin-specific components; those new components end up on top by default. Then you're calling <code>toBehind()</code> and <code>toFront()</code> everywhere, and it all breaks again when the layout changes. Clunky.</p>
+<h3 id="how-it-works-now">How It Works Now</h3>
+<p>We've automated most of this.</p>
+<ul>
+<li>Designers deliver a structured PSD with a specific layer hierarchy. This <em>is</em> the Assembly PSD. We don't create it ourselves.</li>
+<li>A Photoshop plugin we wrote exports all the images and generates metadata (positions, sizes, component types) as XML.</li>
+<li>The app parses that XML at runtime and builds the UI dynamically.</li>
+</ul>
+<p>We stopped doing manual reference checks. The generated layout matches the designer's intent exactly. There's nothing to verify because the source of truth is the same file.</p>
+<p>We still ship one high-res image set and resample at runtime. More on the resampling approach below.</p>
+<p>For Z-ordering, we adopted <strong>sorting layers</strong>, similar to what Unity does. Every component gets an explicit integer sort order. Doesn't matter when it's added or whether it comes from a base or derived class. Background is 0, content is 100, overlays are 200, tooltips are 300. Add a component, assign its layer, done. No more fragile <code>toBehind()</code> / <code>toFront()</code> chains.</p>
+<p>We packaged these tools as JUCE modules and released them alongside the talk. Sharing things that speed up production is always worthwhile.</p>
+<h2 id="dynamic-ui-layout-implementation">Dynamic UI Layout Implementation</h2>
+<p>To move away from hard-coded positions, you need a pipeline that looks roughly like this:</p>
+<ul>
+<li>Designer creates the UI (Figma, Photoshop, whatever)</li>
+<li>Some mechanism extracts metadata: positions, sizes, which images to load</li>
+<li>Images get exported</li>
+<li>The app loads all of this at runtime</li>
+</ul>
+<p>The UI loading system and asset preparation tools are still actively developed and have gained features since the talk.</p>
+<p>Let's walk through how we implemented each piece.</p>
+<h3 id="exporting-images-from-photoshop">Exporting Images from Photoshop</h3>
+<p>Adobe's <a href="https://developer.adobe.com/photoshop/uxp/2022/" target="_blank" rel="noopener noreferrer">UXP platform</a> is the current way to build Photoshop plugins. It's JavaScript (V8), with HTML+CSS for the UI. The <a href="https://developer.adobe.com/photoshop/uxp/2022/guides/devtool/" target="_blank" rel="noopener noreferrer">developer tools</a> are decent; hot reloading makes iteration fast.</p>
+<p><img src="img/ADC2025_Exporter_UI.webp" class="img-fluid" alt="The UI of the image exporter plugin in Photoshop" title="The UI of the image exporter plugin in Photoshop" /></p>
+<p>We built a plugin to export images from the designer's PSD in a controlled way. The real insight here isn't technical: it's organizational. Talk to your designers. Figure out what's easy for them to produce and what you actually need to consume. Find the middle ground.</p>
+<p>Here's a war story. At a different company, the 3D team rendered skeuomorphic UIs and exported frames to a PSD. The 2D team then assembled an Adobe XD document. It was a fancy design bible with component positions and export options. Developers manually transcribed those positions into an XML file for their dynamic UI loader.</p>
+<p>They already had dynamic UI loading! Yet they were still manually copying coordinates from a &quot;design document&quot; that was itself manually created from the actual source file. The creation of the 'design bible' plus the manual UI implementation took about two weeks of work per UI pass.</p>
+<p>After a few conversations with the design team, we realized the PSD already had everything we needed. One Photoshop plugin later, the two-week process became an hour.</p>
+<p>I built another plugin for the current projects at Bogren Digital. The prerequisite is a standardized document format. If the PSD follows a consistent structure, we can automate against it.</p>
+<p>The structure looks like this:</p>
+<pre><code class="language-txt">Root
+├── Buttons
+│   ├── Button1
+│   │   ├── On
+│   │   └── Off
+│   └── Button2
+│       ├── On
+│       └── Off
+├── Knobs
+│   ├── Knob1
+│   │   ├── 001
+│   │   ├── 002
+│   │   ├── 003
+│   │   └── ... (127 frames)
+│   └── Knob2
+│       ├── 001
+│       ├── 002
+│       ├── 003
+│       └── ... (127 frames)
+└── Background
+</code></pre>
+<p>The idea: group layers by component type at the root level (buttons, dials, switches). Each component gets its own group containing all its frames. Keep frame ordering consistent across components. It makes everything downstream simpler.</p>
+<p>Static images like backgrounds sit at the root level ungrouped.</p>
+<h3 id="a-new-feature-defining-hitboxes-in-photoshop">A New Feature: Defining Hitboxes in Photoshop</h3>
+<p>One recent improvement to the UI Loader system is support for loading optional <strong>hitbox masks</strong> from the original design file:</p>
+<p><img src="img/ADC2025_hitbox_mask.webp" class="img-fluid" alt="Hitbox layer defined in the Photoshop design document" title="Hitbox layer defined in the Photoshop design document" /></p>
+<p>If we detect a single layer with the same name as a component group, we treat it as the hitbox mask for that component. Implementing hitbox detection logic in custom components is left to end users. The default implementation in the built-in components looks like this:</p>
+<pre><code class="language-cpp">bool hitTest(int x, int y) override
+{
+  // Use mask-based hit testing if available
+  if (hitboxMask.isValid())
+  {
+      return BogrenDigital::UILoading::HitBoxMaskTester::hitTest(*this, x, y, hitboxMask);
+  }
+
+  // Fall back to manual rectangular bounds
+  /*
+    ...
+  */
+}
+</code></pre>
+<p>Our <code>HitBoxMaskTester</code> utility checks the pixel in the image that proportionally corresponds to the tested point in the current component. If any non-transparent value is detected, click events should be triggered.</p>
+<p>The main benefit: we can support oddly-shaped hitboxes without defining them in C++ code. It's much faster to draw a mask in Photoshop than to calculate and hardcode arbitrary polygons.</p>
+<h3 id="generating-the-layout-definition">Generating the Layout Definition</h3>
+<p>The same plugin that exports images also generates the <strong>layout definition</strong>: an XML file the app parses at startup to build the UI. It looks like this:</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;metadata width=&quot;2430&quot; height=&quot;1600&quot;&gt;
+  &lt;IMAGE name=&quot;LED_On&quot; file=&quot;LED_On.png&quot; x=&quot;313&quot; y=&quot;489&quot; width=&quot;688&quot; height=&quot;410&quot; imageType=&quot;raster&quot; /&gt;
+  &lt;IMAGE name=&quot;Cables&quot; file=&quot;Cables.png&quot; x=&quot;1989&quot; y=&quot;489&quot; width=&quot;441&quot; height=&quot;1111&quot; imageType=&quot;raster&quot; /&gt;
+  &lt;IMAGE name=&quot;Background&quot; file=&quot;Background.png&quot; x=&quot;0&quot; y=&quot;0&quot; width=&quot;2430&quot; height=&quot;1600&quot; imageType=&quot;raster&quot; /&gt;
+  &lt;DIAL name=&quot;Gain Dial&quot; x=&quot;1498&quot; y=&quot;793&quot; width=&quot;582&quot; height=&quot;560&quot; numberOfFrames=&quot;127&quot; fileNamePrefix=&quot;Gain Dial_&quot; fileNameSuffix=&quot;.png&quot; hitboxMask=&quot;Dial_Gain_HitboxMask.png&quot; imageType=&quot;raster&quot; /&gt;
+  &lt;SWITCH name=&quot;Power Switch&quot; x=&quot;554&quot; y=&quot;998&quot; width=&quot;329&quot; height=&quot;364&quot; numberOfFrames=&quot;2&quot; fileNamePrefix=&quot;Power Switch_&quot; fileNameSuffix=&quot;.png&quot; imageType=&quot;raster&quot; /&gt;
+  &lt;SWITCH name=&quot;Channel Switch&quot; x=&quot;987&quot; y=&quot;1004&quot; width=&quot;327&quot; height=&quot;365&quot; numberOfFrames=&quot;2&quot; fileNamePrefix=&quot;Channel Switch_&quot; fileNameSuffix=&quot;.png&quot; imageType=&quot;raster&quot; /&gt;
+&lt;/metadata&gt;
+</code></pre>
+<p>The root element specifies the design's native resolution. Each child element represents either a static image (<code>IMAGE</code>) or an interactive component (<code>DIAL</code>, <code>SWITCH</code>, etc.).</p>
+<p>The attributes are straightforward: <code>x</code>, <code>y</code>, <code>width</code>, <code>height</code> define the bounding box. For animated components, <code>numberOfFrames</code> tells the loader how many images to expect, and <code>fileNamePrefix</code>/<code>fileNameSuffix</code> define the naming pattern.</p>
+<p>The <code>imageType=&quot;raster&quot;</code> attribute hints that we handle multiple types of graphical assets in our system (raster and vector). More on this later.</p>
+<p><code>hitboxMask</code> is an optional attribute specifying the filename of the hitbox mask image, if one exists for the given component.</p>
+<p>The <code>name</code> attribute comes directly from the Photoshop layer name. This means typos in the PSD propagate straight through to your code. You'll discover &quot;Gain Dail&quot; exists when your parameter binding fails at runtime. Such is life.</p>
+<h3 id="using-the-ui-loader">Using the UI Loader</h3>
+<p>The UI builder has two dependencies:</p>
+<ol>
+<li>A container <code>juce::Component</code> object to which all components will be added.</li>
+<li>An image loader utility that wraps around the functions and members of the binary data namespace generated when working with binary assets in JUCE projects.</li>
+</ol>
+<p>A factory pattern handles component creation. If we need custom component types, we register a factory for them before loading the UI.</p>
+<p>During initialization, we parse the layout definition line-by-line to create the required components.</p>
+<p>Initialization looks like this:</p>
+<pre><code class="language-cpp">void initializeUILoader()
+{
+  imageLoader = std::make_unique&lt;BogrenDigital::UILoading::BinaryAssetImageLoader&gt; (
+          BinaryData::namedResourceList,
+          BinaryData::namedResourceListSize,
+          BinaryData::getNamedResource,
+          BinaryData::getNamedResourceOriginalFilename);
+
+  uiLoader = std::make_unique&lt;BogrenDigital::UILoading::UILoader&gt; (uiContainer, *imageLoader);
+
+  // register factories before creating the components
+  uiLoader-&gt;getComponentFactoryRegistry().registerFactory&lt;TwoPositionSwitchKnobFactory&gt; (&quot;SWITCH&quot;, &quot;raster&quot;);
+  uiLoader-&gt;getComponentFactoryRegistry().registerFactory&lt;BogrenDigital::UILoading::SwitchFactory&gt; ( &quot;TOGGLE&quot;, &quot;raster&quot;);
+  uiLoader-&gt;getComponentFactoryRegistry().registerFactory&lt;LampFactory&gt; ( &quot;LAMP&quot;, &quot;raster&quot;);
+
+  uiLoader-&gt;loadUI (&quot;metadata.xml&quot;);
+}
+</code></pre>
+<p>The payoff comes in <code>resized()</code>:</p>
+<pre><code class="language-cpp">void resized() override
+{
+  // Size the container first, then apply layout
+  // UILoader automatically maintains aspect ratio and repositions components
+  uiContainer.setBounds(getLocalBounds());
+  uiLoader-&gt;applyLayout();
+}
+</code></pre>
+<p>No more hard-coded positions. This is much cleaner.</p>
+<h3 id="tangent-mcp-based-figma-integration-with-llms">Tangent: MCP-based Figma Integration With LLMs</h3>
+<p>We covered how graphical assets can be lifted from Photoshop and displayed in our JUCE application, but what if you (or your designers) use Figma instead?</p>
+<p>We mostly use Figma for non-skeuomorphic menus that are reused between products and rarely change. Setting up a full automated pipeline for these wasn't justified. But we still wanted to use our UI loader system for non-skeuomorphic components, and we wanted to avoid manually deriving the layout definition and exporting images.</p>
+<p>This is 2025, so LLM-based workflows are getting genuinely useful for tedious tasks like these. Figma has an MCP server <a href="https://www.figma.com/blog/introducing-figma-mcp-server/" target="_blank" rel="noopener noreferrer">built into their app (available in dev mode)</a>. This lets LLM-based agents query your design details and derive the same XML structure we discussed earlier:</p>
+<p><img src="img/ADC2025_Figma_UI_Layout.webp" class="img-fluid" alt="UI Layout Definition generated with Claude Code" title="UI Layout Definition generated with Claude Code" /></p>
+<p>One current limitation of Figma's built-in MCP server: it can't export images as SVG. We had to rely on third-party MCP servers for that.</p>
+<h3 id="specializing-the-ui-loader-for-various-image-types">Specializing the UI Loader for Various Image Types</h3>
+<p>The UI loader can handle multiple image types simultaneously, so you can load different layouts together:</p>
+<pre><code class="language-cpp">uiLoader-&gt;getComponentFactoryRegistry().registerFactory&lt;ImageComponentFactory&gt; (&quot;IMAGE&quot;, &quot;raster&quot;);
+uiLoader-&gt;getComponentFactoryRegistry().registerFactory&lt;SVGImageComponentFactory&gt; ( &quot;IMAGE&quot;, &quot;vector&quot;);
+</code></pre>
+<p>This factory pattern makes the UI loader system highly customizable and fairly generic.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>In Part 1, we looked at the general overview of our UI implementation workflow at Bogren Digital and how we evolved our processes over time. We also explored the internals of our dynamic UI loading system and its offline authoring tools.</p>
+<p>In upcoming articles, we'll dive into component ordering on the z-plane, resizing and resampling of images, and more.</p>
+<h2 id="glossary">Glossary</h2>
+<div class="table-responsive"><table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Assembly PSD</td>
+<td>The Photoshop document containing all component frames in their correct positions, representing the complete UI layout.</td>
+</tr>
+<tr>
+<td>Reference Image</td>
+<td>A flattened export of the Assembly PSD used to validate the implementation against the design.</td>
+</tr>
+<tr>
+<td>Sorting Layer</td>
+<td>An integer z-order value assigned to each component. Components are rendered in sort order regardless of when they were added to the hierarchy. We use named constants (Background = 0, Content = 100, Overlay = 200, Tooltip = 300) with room for fine-grained ordering between them (Background + 1 for elements that sit just above the background, etc.).</td>
+</tr>
+<tr>
+<td>Layout Definition</td>
+<td>The XML file generated by the Photoshop plugin, containing component positions, sizes, types, and image references. Parsed at runtime to construct the UI.</td>
+</tr>
+<tr>
+<td>Hitbox Mask</td>
+<td>A small image matching a component's proportions used for pixel-accurate hit testing. Non-transparent pixels indicate clickable regions, enabling support for irregular shapes without hardcoded geometry.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>
