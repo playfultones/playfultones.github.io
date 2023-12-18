@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Loading JUCE Plugins in Android Unity Projects the right way | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Loading JUCE Plugins in Android Unity Projects the right way</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/juce-initialisation.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Loading JUCE Plugins in Android Unity Projects the right way</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="03-06-2024">03-06-2024</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h3 id="introduction">Introduction</h3>
+<p>Previously, I mentioned that the JUCE Message Manager relies on JNI (Java Native Interface) on Android. This reliance is because JUCE needs to interact with the Android OS through Java. Consequently, when the audio plugin in your Unity application loads on startup, it crashes due to the uninitialized JNI dependencies required by JUCE. I had attempted to work around this by reimplementing the JUCE message queue in C++ on Android, but I have now found a better solution and am excited to share it with you.</p>
+<p>First time building a JUCE plugin for Unity on Android? Check out the <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue" target="_blank" rel="noopener noreferrer">previous article</a>, where I explain how to enable the Unity plugin format and build a JUCE plugin for Android using CMake.</p>
+<h3 id="initializing-juce-before-loading-the-plugin">Initializing JUCE Before Loading the Plugin</h3>
+<p>As the <a href="https://docs.juce.com/master/classThread.html#a414755620d63dbeada96b1de5309c778" target="_blank" rel="noopener noreferrer">documentation</a> states, we need to call <code>Thread::initialiseJUCE</code> before loading the plugin. We need to pass in the Java context to this method from our Unity application before we can use any JUCE APIs.</p>
+<p>Our strategy is to disable the auto-loading of the plugin in Unity and then load the plugin after the <code>initialiseJUCE</code> method has been called. This means we will need a bootstrapper scene before loading another scene that uses a mixer with the plugin added to it. The bootstrapper scene will call the <code>initialiseJUCE</code> method via a Java class. To execute Java code in our Unity application, we will use the <a href="https://docs.unity3d.com/ScriptReference/AndroidJavaClass.html" target="_blank" rel="noopener noreferrer">AndroidJavaClass</a> class of the Unity API.</p>
+<p>Once the <code>initialiseJUCE</code> method has been called, we will need to load the plugin's DLL in the C# domain. Failing to do this will result in an error when loading the main scene:</p>
+<pre><code class="language-HTML">Audio effect &quot;DemoSynth&quot; could not be found. Check that the project contains the correct native audio plugin libraries and that the importer settings are set up correctly.
+</code></pre>
+<p>Calling any method with P/Invoke will load the plugin's DLL in the .NET runtime. We should do this before loading the scene that uses the plugin.</p>
+<p>After the plugin's DLL has been loaded, we can load the main scene. Everything should work smoothly from there.</p>
+<h4 id="setup-steps">Setup Steps</h4>
+<ol>
+<li>Untick &quot;Load on startup&quot; in your plugin's settings in Unity:</li>
+</ol>
+<p><img src="img/auto-load-on-startup.webp" class="img-fluid" alt="Auto-load on startup" /></p>
+<p>You can still keep the plugin auto-load in other platforms like Windows, macOS, and iOS.</p>
+<ol start="2">
+<li>Add a Java class with the following content:</li>
+</ol>
+<pre><code class="language-Java">package com.rmsl.juce;
+
+import android.content.Context;
+
+public class Java {
+    static { System.loadLibrary(&quot;audioplugin_DemoSynth&quot;); } // Replace the lib name with your plugin's name.
+    public native static void initialiseJUCE(Context context);
+}
+</code></pre>
+<p>I keep the following folder structure in the Assets folder:</p>
+<pre><code>Plugins                                                          
+└─Android                        
+  ├─libs                         
+  │ └─libaudioplugin_DemoSynth.so
+  └─src                                                      
+    └─com                                                
+      └─rmsl                                             
+        └─juce                                         
+          └─Java.java            
+</code></pre>
+<ol start="3">
+<li>Add the following script to the bootstrapper scene:</li>
+</ol>
+<pre><code class="language-csharp">using UnityEngine;
+
+public class JUCEInitializer : MonoBehaviour
+{
+    private void Start()
+    {
+        #if UNITY_ANDROID &amp;&amp; !UNITY_EDITOR
+        using (AndroidJavaClass unityPlayer = new AndroidJavaClass(&quot;com.unity3d.player.UnityPlayer&quot;))
+        {
+            AndroidJavaObject activity = unityPlayer.GetStatic&lt;AndroidJavaObject&gt;(&quot;currentActivity&quot;);
+
+            // Get the application context
+            AndroidJavaObject context = activity.Call&lt;AndroidJavaObject&gt;(&quot;getApplicationContext&quot;);
+
+            // Call the initialiseJUCE method
+            using (AndroidJavaClass juceJava = new AndroidJavaClass(&quot;com.rmsl.juce.Java&quot;))
+            {
+                juceJava.CallStatic(&quot;initialiseJUCE&quot;, context);
+            }
+            // Load the demo synth plugin by calling a method in the DemoSynth class. Note that it doesn't really matter which method you call, the important thing is that the plugin's .so file is loaded in the .NET runtime.
+            DemoSynth.getInstance();
+        }
+        #else
+        Debug.Log(&quot;JUCEInitializer: Not on Android, skipping JUCE initialization&quot;);
+        #endif
+
+        LoadNextScene();
+    }
+
+    private void LoadNextScene()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(&quot;YourSceneName&quot;);
+    }
+}
+</code></pre>
+<p>You probably want to have a more sophisticated way of loading scenes in your project. This code snippet is just for demonstration purposes; consider firing off an event after initialization that will load the next scene.</p>
+<h4 id="the-call-order">The Call Order</h4>
+<p>Once you set up the scene correctly, the call order will be as follows:</p>
+<p><strong>Bootstrapper scene</strong></p>
+<ol>
+<li>The <code>JUCEInitializer</code> MonoBehaviour is loaded, which calls the <code>initialiseJUCE</code> method in your Java class.</li>
+<li>The Java method loads the plugin's <code>.so</code> file and passes in the Java context to the JUCE runtime. This enables the JUCE submodules correctly, as outlined in the JUCE documentation.</li>
+<li>Call any method in the native plugin from a MonoBehaviour to load the <code>.so</code> in the .NET runtime.</li>
+<li>Load the scene that uses the mixer.</li>
+</ol>
+<p><strong>Main scene</strong></p>
+<ol start="5">
+<li>The mixer with the plugin is loaded. Unity will call <code>UnityGetAudioEffectDefinitions()</code>, which is the entry point for the plugin.</li>
+<li><code>MessageManager::doPlatformSpecificInitialisation()</code> is called, which will not crash the application because the JUCE runtime has been initialized correctly.</li>
+<li><code>createPluginFilter()</code> is called, creating the <code>AudioProcessor</code> instance with all of JUCE's facilities available to it.</li>
+</ol>
+<h3 id="conclusion">Conclusion</h3>
+<p>By initializing JUCE before loading the plugin, you can ensure that your JUCE plugins work smoothly in Android Unity projects. Following the outlined steps will prevent crashes and enable the JUCE submodules correctly, providing a stable environment for your audio plugins.</p>
+<p>The main takeaway from researching this topic is that native audio plugins in Unity don't need to be loaded on startup. You can load them when needed, which helps resolve any initialization issues you might encounter. I previously thought there was no way to execute any code before the plugin was loaded, but I was wrong. Discovering this meant I could fully unlock the potential of JUCE plugins in Android Unity projects.</p>
+<p>I made all code examples available on GitHub in the following repositories: <a href="https://github.com/playfultones/DemoUnityApp" target="_blank" rel="noopener noreferrer">Unity project</a>, <a href="https://github.com/playfultones/DemoSynthPlugin" target="_blank" rel="noopener noreferrer">Plugin project</a>, <a href="https://github.com/playfultones/JUCE" target="_blank" rel="noopener noreferrer">My JUCE fork</a>.</p>
+<p>This should get you started with building JUCE plugins for Android Unity projects. Let me know if you have any questions or suggestions.</p>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Building JUCE Plugins for Android Unity Projects, with a native message queue | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Building JUCE Plugins for Android Unity Projects, with a native message queue</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/android-unity.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Building JUCE Plugins for Android Unity Projects, with a native message queue</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="26-02-2024">26-02-2024</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h3 id="introduction">Introduction</h3>
+<p>This time, let's talk about building JUCE plugins for Android Unity projects. I'll show you how to enable Unity plugin builds for Android in JUCE using CMake. Furthermore, I will present a native message queue implementation for your Android plugin that can replace the default JNI-based implementation in JUCE, which has the unfortunate side effect of crashing Unity applications.</p>
+<p><strong>Update:</strong> I have written a new article on this topic. The only relevant part of this article that remains useful is the section on how to enable Unity plugin builds in JUCE with CMake. I have found a better solution for the Android message queue problem. You can find the new article <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h3 id="enabling-unity-plugin-builds-in-juce-with-cmake">Enabling Unity plugin builds in JUCE with CMake</h3>
+<p>Creating an Android dynamic library for Unity is quite simple. Although JUCE does not officially support the Unity wrapper on mobile platforms, it's easy to enable it. Let's see how:</p>
+<p><strong>Pre-requisites:</strong></p>
+<ul>
+<li>Unity installed with Android build support (or you could use any other Android NDK distribution)</li>
+<li>CMake</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Enable <code>Unity</code> plugin format in <code>extras/Build/CMake/JUCEModuleSupport.cmake</code>:</li>
+</ol>
+<pre><code class="language-cmake">if(CMAKE_SYSTEM_NAME STREQUAL &quot;iOS&quot; OR CMAKE_SYSTEM_NAME STREQUAL &quot;Android&quot;)
+    list(APPEND result Unity)
+endif()
+</code></pre>
+<ol start="2">
+<li><p>The name of the plugin should start with <code>audioplugin_</code> to be recognized by Unity. Thanks for the tip, <a href="https://forum.juce.com/t/bug-android-exporter-in-projucer-for-unity-plugins-not-working/59794/7" target="_blank" rel="noopener noreferrer">Cymatic</a>!</p>
+</li>
+<li><p>I use the NDK toolchain that comes with Unity, so I set the following environment variables when running the CMake generator:</p>
+</li>
+</ol>
+<pre><code class="language-bash">-DCMAKE_SYSTEM_NAME=Android -DCMAKE_TOOLCHAIN_FILE=/Applications/Unity/Hub/Editor/&lt;Your Unity editor version&gt;/PlaybackEngines/AndroidPlayer/NDK/build/cmake/android.toolchain.cmake
+</code></pre>
+<p>That's all! The generated project will now include the <code>Unity</code> plugin format. You can build your JUCE plugin as usual and use the generated <code>.so</code> file in your Unity project.</p>
+<h3 id="replacing-the-android-message-queue-implementation-in-juce">Replacing the Android Message Queue Implementation in JUCE</h3>
+<p>However, there is a catch. The default JUCE message queue implementation for Android is based on JNI, which does not work out of the box and crashes the app when it initially loads the plugin with this stack trace:</p>
+<p><img src="img/unity-android-crash.webp" class="img-fluid" alt="" /></p>
+<p>Unity does have a JNI interface called <code>AndroidJNI</code>, which could expose the <a href="https://docs.unity3d.com/ScriptReference/AndroidJNI.NewObject.html" target="_blank" rel="noopener noreferrer"><code>NewObject</code> method</a>. However, it's challenging to figure out if it's feasible to invoke this from the native domain somehow before any gameplay code gets executed. Therefore, I decided to implement a native message queue for Android in my JUCE plugin. Behold:</p>
+<pre><code class="language-cpp">struct AndroidMessageQueue {
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (AndroidMessageQueue, true)
+
+    AndroidMessageQueue() : quitFlag(false) {
+        messageThread = std::thread(&amp;AndroidMessageQueue::processMessages, this);
+    }
+
+    ~AndroidMessageQueue() {
+        JUCE_ASSERT_MESSAGE_THREAD
+        quitFlag = true;
+        cv.notify_one();
+        messageThread.join();
+    }
+
+    bool post(MessageManager::MessageBase::Ptr&amp;&amp; message) {
+        if (! quitFlag) {
+            queue.add(message);
+            std::lock_guard&lt;std::mutex&gt; lock(cv_m);
+            cv.notify_one();
+            return true;
+        }
+        return false;
+    }
+
+private:
+    void processMessages() {
+        while (! quitFlag) {
+            std::unique_lock&lt;std::mutex&gt; lock(cv_m);
+            cv.wait(lock, [this] { return ! queue.isEmpty() || quitFlag; });
+
+            while (! queue.isEmpty()) {
+                auto message = queue.removeAndReturn(0);
+                if (message != nullptr)
+                    message-&gt;messageCallback();
+            }
+        }
+    }
+
+    ReferenceCountedArray&lt;MessageManager::MessageBase, CriticalSection&gt; queue;
+    std::condition_variable cv;
+    std::mutex cv_m;
+    std::thread messageThread;
+    std::atomic&lt;bool&gt; quitFlag;
+};
+
+JUCE_IMPLEMENT_SINGLETON (AndroidMessageQueue)
+</code></pre>
+<p>This implementation should replace the original <code>AndroidMessageQueue</code> struct in <code>modules/juce_events/native/juce_Messaging_android.cpp</code>.</p>
+<p>The <code>AndroidMessageQueue</code> class is a singleton that runs a separate thread to process messages. It uses a condition variable to signal the message thread when a new message is posted. The <code>post</code> method is used to post a message to the queue, and the <code>processMessages</code> method is the message thread's main loop. It integrates seamlessly with the JUCE message manager, so it's quite easy to use.</p>
+<p>I am yet to stress-test this implementation, but it seems to work fine in my initial tests. Can you think of a more efficient way to implement this? I'd be happy to hear your thoughts.</p>
+<h3 id="demo-project">Demo Project</h3>
+<p>Would you like to see this implementation in action?</p>
+<p>I have developed a simple Unity project that incorporates a JUCE plugin for Android. Access it <a href="https://github.com/playfultones/DemoUnityApp" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<p>The source code for the synth plugin utilized in this Unity project is available <a href="https://github.com/playfultones/DemoSynthPlugin" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<p>Curious about the modifications made to JUCE? Explore my customized fork of the JUCE framework <a href="https://github.com/playfultones/JUCE" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>In this article, I showed you how to build JUCE plugins for Android Unity projects. An example project is available for you to try out. Let me know if you have any questions or suggestions.</p>
+<p>I am excited about this development as it can open up many possibilities for game audio developers targeting Android devices, such as the Meta Quest headsets.</p>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Bringing JUCE Synth Plugins to iOS Unity Projects | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Bringing JUCE Synth Plugins to iOS Unity Projects</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/ios-unity.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Bringing JUCE Synth Plugins to iOS Unity Projects</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="11-12-2023">11-12-2023</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h3 id="introduction">Introduction</h3>
+<p>Integrating JUCE audio plugins with Unity on the iOS platform presents unique challenges. Officially, mobile builds are not directly supported by JUCE for Unity native audio plugins. However, with JUCE's existing support for iOS plugin development, enabling Unity plugins for iOS platforms is a feasible task.</p>
+<p>This article will guide you through the necessary modifications in the JUCE framework to achieve this and explain how to incorporate these plugins into your Unity project.</p>
+<p>Note that this walkthrough only covers CMake-based JUCE projects. If you're using the Projucer, this guide will not be applicable. However, the concepts presented here may still be useful for understanding how to modify the Projucer exporter to support iOS Unity plugins.</p>
+<h3 id="modifying-the-juce-framework-for-ios-unity-plugins">Modifying the JUCE Framework for iOS Unity Plugins</h3>
+<p>One of the main differences in building iOS plugins for Unity is that they must be static libraries (<code>.a</code> files) instead of dynamic libraries (<code>.dylib</code> files). The JUCE CMake API does not currently support this, so we must make some modifications to the framework to enable this functionality. Below is a step-by-step walkthrough:</p>
+<ol>
+<li><p><strong>Modify JUCEModuleSupport.cmake</strong>: Locate the file <code>extras/Build/CMake/JUCEModuleSupport.cmake</code> in the JUCE framework. Under the function <code>_juce_get_platform_plugin_kinds</code>, add the following lines:</p>
+<pre><code class="language-cmake">if(CMAKE_SYSTEM_NAME STREQUAL &quot;iOS&quot;)
+    list(APPEND result Unity)
+endif()
+</code></pre>
+<p>This adds the <code>Unity</code> plugin format to the list of available plugin formats for iOS platforms.</p>
+</li>
+<li><p><strong>Adjust JUCEUtils.cmake</strong>: In <code>extras/Build/CMake/JUCEUtils.cmake</code>, update the function <code>_juce_link_plugin_wrapper</code>. Add these lines to enable the static library creation for iOS Unity plugins at the first if statement in the function:</p>
+<pre><code class="language-cmake">elseif((CMAKE_SYSTEM_NAME STREQUAL &quot;iOS&quot;) AND (kind STREQUAL &quot;Unity&quot;))
+    add_library(${target_name} STATIC)
+    add_custom_command(TARGET ${target_name} POST_BUILD
+         COMMAND libtool -static -o &quot;${CMAKE_CURRENT_BINARY_DIR}/${target}_artefacts/$&lt;CONFIG&gt;/Unity/${target_name}.a&quot; $&lt;TARGET_FILE:${shared_code_target}&gt; $&lt;TARGET_FILE:${target_name}&gt;
+         COMMENT &quot;Combining static libraries into ${target_name}.a&quot;
+     )
+</code></pre>
+<p>This creates a combined static library from the shared code target and the plugin target. The resulting <code>.a</code> file will be placed in <code>&lt;cmake_build_dir&gt;/&lt;target_name&gt;_artefacts/&lt;config&gt;/Unity/</code>.</p>
+<p>Also, we don't want a bundle to be created, so we should update this condition a bit further down in the function:</p>
+<pre><code class="language-cmake">if(NOT kind STREQUAL &quot;LV2&quot;)
+     _juce_configure_bundle(${shared_code_target} ${target_name})
+</code></pre>
+<p>to this:</p>
+<pre><code class="language-cmake">if(NOT kind STREQUAL &quot;LV2&quot; AND NOT (CMAKE_SYSTEM_NAME STREQUAL &quot;iOS&quot; AND kind STREQUAL &quot;Unity&quot;))
+    _juce_configure_bundle(${shared_code_target} ${target_name})
+</code></pre>
+</li>
+</ol>
+<p>My fork of the JUCE framework, which includes these changes, is available <a href="https://github.com/playfultones/JUCE" target="_blank" rel="noopener noreferrer">here</a>. You can check the differences between the original JUCE framework repository and my fork to see the exact changes made.</p>
+<h3 id="integrating-the-plugin-into-unity">Integrating the Plugin into Unity</h3>
+<p>After building your JUCE plugin with these modifications, the output will be a combined static library file (<code>.a</code>). Follow these steps to integrate it into your Unity project:</p>
+<ol>
+<li><p><strong>Place the Static Library</strong>: Copy the <code>.a</code> file into the <code>Assets/Plugins/iOS</code> folder in your Unity project.</p>
+</li>
+<li><p><strong>Set Framework Dependencies</strong>: In the Unity editor, specify these framework dependencies under the plugin settings: <code>Accelerate</code>, <code>CoreAudioKit</code>, <code>CoreImage</code>.</p>
+<p><img src="img/ios-frameworks.webp" class="img-fluid" alt="" /></p>
+<p>A minimal JUCE synth plugin will depend on these 3 frameworks. If your plugin uses additional frameworks, you will need to add them here as well.</p>
+</li>
+<li><p><strong>Add iOS-Specific Code</strong>: Include the following Objective-C code snippet saved as <code>Assets/Plugins/iOS/MyPluginAppcontroller.mm</code> to register the audio plugin (credit goes to <a href="https://forum.juce.com/t/unity-plugin-mobile-build-support/36060/9" target="_blank" rel="noopener noreferrer">tonetech on the JUCE forum</a> for this tip):</p>
+</li>
+</ol>
+<pre><code class="language-objc">#include &quot;UnityAppController.h&quot;
+@interface MyPluginAppController : UnityAppController {}
+@end
+
+extern &quot;C&quot; {
+// Manually register the Unity Audio Effect plugin.
+struct UnityAudioEffectDefinition;
+typedef int (\*UnityPluginGetAudioEffectDefinitionsFunc)(
+struct UnityAudioEffectDefinition**_ descptr);
+extern void UnityRegisterAudioPlugin(
+UnityPluginGetAudioEffectDefinitionsFunc getAudioEffectDefinitions);
+extern int UnityGetAudioEffectDefinitions(UnityAudioEffectDefinition_** definitionptr);
+}
+
+@implementation MyPluginAppController
+
+- (void)preStartUnity {
+  [super preStartUnity];
+  UnityRegisterAudioPlugin(&amp;UnityGetAudioEffectDefinitions); // Initialize native audio plugins
+  }
+
+@end
+
+IMPL_APP_CONTROLLER_SUBCLASS( MyPluginAppController )
+</code></pre>
+<p>This ensures that the Unity audio system recognizes and initializes your native audio plugin correctly.</p>
+<ol start="4">
+<li><strong>Keep the Audio Session Active</strong>: In the Unity iOS build, the audio mixer (and consequently your plugin) is deactivated when there is no audio source playing.</li>
+</ol>
+<p>If you're planning to use a synth plugin, you will want to keep the audio mixer active at all times. To do this, you can simply keep looping a silent audio clip routed to the mixer. This will keep the audio mixer active, and your synth plugin will continue to run.</p>
+<p><img src="img/ios-mixer.webp" class="img-fluid" alt="" /></p>
+<ol start="5">
+<li><strong>Build the Xcode Project</strong>: Set the target platform to iOS in the Unity Editor. Create the Xcode project in the Build menu in Unity. Remember to update your code signing settings. The Xcode project doesn't need any other modifications afterward.</li>
+</ol>
+<h3 id="conclusion">Conclusion</h3>
+<p>With these adjustments, JUCE can be extended to support Unity plugin development for iOS platforms, allowing you to leverage its powerful audio capabilities within mobile Unity projects. For further references, please visit the sample Unity project, JUCE project, and the modified JUCE fork repository available at the links below:</p>
+<ul>
+<li>JUCE Fork: <a href="https://github.com/playfultones/JUCE" target="_blank" rel="noopener noreferrer">https://github.com/playfultones/JUCE</a></li>
+<li>Demo Synth Plugin: <a href="https://github.com/playfultones/DemoSynthPlugin" target="_blank" rel="noopener noreferrer">https://github.com/playfultones/DemoSynthPlugin</a></li>
+<li>Demo Unity Project: <a href="https://github.com/playfultones/DemoUnityApp" target="_blank" rel="noopener noreferrer">https://github.com/playfultones/DemoUnityApp</a></li>
+</ul>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>

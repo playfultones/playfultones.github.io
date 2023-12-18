@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Navigating Template Instantiation Woes in Static Libraries | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Favicons -->
+<link href="https://playfultones.com/assets/img/favicon.png" rel="icon" />
+<link href="https://playfultones.com/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="https://playfultones.com/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="https://playfultones.com/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="https://playfultones.com/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://playfultones.com/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="https://playfultones.com/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="https://playfultones.com">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="https://playfultones.com/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="https://playfultones.com/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="https://playfultones.com/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="https://playfultones.com">Home</a></li>
+<li><a href="https://playfultones.com/blog">Blog</a></li>
+<li>Navigating Template Instantiation Woes in Static Libraries</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="https://playfultones.com/blog/img/computer_problems.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Navigating Template Instantiation Woes in Static Libraries</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="11-12-2024">11-12-2024</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h3 id="introduction">Introduction</h3>
+<p>Working with C++ templates can be both empowering and challenging. Recently, I embarked on a project that involved a complex interplay of templates and static libraries. Along the way, I stumbled upon a perplexing issue that led to undefined behavior on Windows.</p>
+<p>In this post, I'll share my journey through this problem, how multiple static libraries using the same dependency can cause subtle bugs, and how I ultimately resolved it by managing template instantiations properly.</p>
+<p>Please note that the code snippets and examples provided here are simplified for clarity and may not reflect the exact structure of the original project.</p>
+<p>All credits for the cover image go to <a href="https://xkcd.com/722/" target="_blank" rel="noopener noreferrer">xkcd</a>.</p>
+<h3 id="the-problem">The Problem</h3>
+<p>The project's main executable linked against two static libraries, let's call them <strong>Library A</strong> and <strong>Library B</strong>. Both of these libraries relied on a common templated class provided by a shared module. Moreover, both libraries instantiated this template with the same parameters.</p>
+<p>Here's a simplified diagram of the structure:</p>
+<pre><code class="language-ascii">Main Executable
+├── Library A
+│   └── Depends on Common Template (Template&lt;int, int&gt;)
+├── Library B
+    └── Depends on Common Template (Template&lt;int, int&gt;)
+</code></pre>
+<p>And an example of how the template was used in the libraries:</p>
+<pre><code class="language-cpp">// Library A
+class A {
+public:
+    A() {
+        obj = std::make_unique&lt;Template&lt;int, int&gt;&gt;(/* ... */);
+        // ...
+    }
+private:
+    std::unique_ptr&lt;TemplateBase&gt; obj;
+    // ...
+};
+</code></pre>
+<p>The consequences aren't immediately obvious - the code compiles and links successfully. However, at runtime, calling virtual functions on these objects can lead to undefined behavior as the program jumps between different vtable implementations.</p>
+<p>What makes this particularly insidious is that the behavior might vary between debug and release builds, or even between different runs of the same executable.</p>
+<p>After extensive debugging, it became clear that the root of the problem was multiple instantiations of the same template across different static libraries, leading to violations of the One Definition Rule (ODR) in C++.</p>
+<h3 id="understanding-the-cause">Understanding the Cause</h3>
+<p>C++ templates are instantiated wherever they are used unless explicitly instructed otherwise. This means that when both <strong>Library A</strong> and <strong>Library B</strong> included the header for the templated class and instantiated it with the same type parameters, each library ended up with its own separate instantiation of the template.</p>
+<p>On Windows, this situation can cause undefined behavior because the linker treats these identically named symbols from different static libraries as separate entities. This can lead to multiple versions of the same function or class existing in the final executable, which violates the ODR and results in unpredictable program behavior.</p>
+<p>In the scope of audio applications, where multiple static libraries might depend on the same templated classes for DSP algorithms or audio processing, undefined behavior might manifest as audio glitches, no sound, or other non-deterministic behavior, which can be hard to diagnose.</p>
+<p>Note that both the MSVC linker and the Clang linker has a COMDAT folding feature that can help in some of these cases. However, it's not a guaranteed solution, and it's better to avoid the problem altogether by ensuring that the template is instantiated only once.</p>
+<h3 id="the-solution-managing-template-instantiations">The Solution: Managing Template Instantiations</h3>
+<p>To resolve this issue, it was necessary to ensure that the template was instantiated only once in the entire application. Here's how it was done:</p>
+<p><strong>1. Creating a factory for template instantiation</strong></p>
+<p>Instead of having the static libraries instantiate the template, a factory function was introduced in the main application to handle the creation of template instances. The static libraries would then use this factory to obtain instances of the template class. Instead of directly instantiating the template, the libraries would request instances from the factory, passing any necessary parameters.</p>
+<pre><code class="language-cpp">// Factory.h - Accessed by static libraries
+class Factory {
+public:
+    static std::unique_ptr&lt;TemplateBase&gt; createTemplateInstance(int, int, ...); // TemplateBase is the abstract base class, which has the common interface for interacting with the template instances.
+};
+</code></pre>
+<pre><code class="language-cpp">// Factory.cpp - Defined in the main application
+std::unique_ptr&lt;TemplateBase&gt; Factory::createTemplateInstance(int templateParam1, int templateParam2, ...) {
+    if (templateParam1 == 42 &amp;&amp; templateParam2 == 42)
+        return std::make_unique&lt;Template&lt;42, 42&gt;&gt;(...);
+    else if (// list supported template parameters)
+        return std::make_unique&lt;Template&lt;...&gt;&gt;(...);
+     else {
+        return nullptr;
+    }
+}
+</code></pre>
+<p>As there were only a few supported template parameter combinations, the factory function could easily handle the instantiation logic based on the provided parameters. However, for more complex scenarios, a more sophisticated factory mechanism might be required.</p>
+<p><strong>2. Using Dependency Injection to pass the factory</strong></p>
+<p>In the static libraries, the factory function was passed as a parameter to the classes that needed instances of the templated class. This allowed the libraries to obtain instances without directly instantiating the template.</p>
+<pre><code class="language-cpp">// Library A
+class A {
+public:
+    A(Factory&amp; factory) {
+        obj = factory.createTemplateInstance(/* pass necessary parameters */);
+        // ...
+    }
+private:
+    std::unique_ptr&lt;TemplateBase&gt; obj;
+    // ...
+};
+</code></pre>
+<h3 id="results-and-reflections">Results and Reflections</h3>
+<p>With these changes, the undefined behavior disappeared, and the application started running reliably on Windows. This experience reinforced several key lessons:</p>
+<ul>
+<li><strong>Control Template Instantiation Points:</strong> Centralizing template instantiation prevents multiple definitions and potential ODR violations.</li>
+<li><strong>Use Dependency Injection:</strong> Providing instances via a factory function ensures that templates are instantiated in a controlled manner.</li>
+<li><strong>Leverage Abstract Interfaces:</strong> Interacting with objects through abstract base class interfaces can help manage dependencies and reduce coupling.</li>
+<li><strong>Be Mindful of Cross-Library Dependencies:</strong> When multiple static libraries depend on the same templates, coordination is essential to prevent conflicts.</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<p>Templates are a powerful feature in C++, but with that power comes complexity. By understanding how templates are instantiated and being deliberate about where and how this happens, you can avoid subtle bugs and ensure your application behaves as expected.</p>
+<p>If you find yourself facing similar issues, consider reviewing your template instantiation strategy:</p>
+<ul>
+<li><strong>Centralize template instantiation in a single location.</strong></li>
+<li><strong>Use factory functions to manage object creation and dependency injection.</strong></li>
+<li><strong>Rely on abstract interfaces to interact with templated objects.</strong></li>
+</ul>
+<p>Happy coding!</p>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="https://playfultones.com/blog/img/ios-unity.webp" alt="">
+            <h4>
+                <a href="https://playfultones.com/blog/bringing-juce-synth-plugins-to-ios-unity-projects">Bringing JUCE Synth Plugins to iOS Unity Projects</a>
+            </h4>
+            <time datetime="2023-12-11">December 11, 2023</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="https://playfultones.com/blog/tags/juce">JUCE</a></li>
+<li><a href="https://playfultones.com/blog/tags/unity">Unity</a></li>
+<li><a href="https://playfultones.com/blog/tags/ios">iOS</a></li>
+<li><a href="https://playfultones.com/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="https://playfultones.com/blog/tags/c">C++</a></li>
+<li><a href="https://playfultones.com/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="https://playfultones.com/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="https://playfultones.com/blog/tags/adc">ADC</a></li>
+<li><a href="https://playfultones.com/blog/tags/android">Android</a></li>
+<li><a href="https://playfultones.com/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="https://playfultones.com/blog/tags/templates">Templates</a></li>
+<li><a href="https://playfultones.com/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+<div class="container d-md-flex py-4">
+  <div class="me-md-auto text-center text-md-start">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 - 2025. All
+      Rights Reserved
+    </div>
+  </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="https://playfultones.com/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="https://playfultones.com/assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://playfultones.com/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="https://playfultones.com/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>
