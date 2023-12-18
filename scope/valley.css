@@ -1,0 +1,74 @@
+/* Scoped to the hero; the copied site keeps its existing style below it. */
+#hero.valley-hero { position: relative; height: 100svh; min-height: 680px; padding: 0; overflow: hidden; isolation: isolate; background: #10091f; color: #f9ebe7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+#hero.valley-hero::before { content: none; }
+#hero [hidden] { display: none !important; }
+#hero button, #hero a { -webkit-tap-highlight-color: transparent; }
+#hero button { font: inherit; }
+#hero button:focus-visible, #hero a:focus-visible, #hero .landscape:focus-visible { outline: 2px solid #9adee0; outline-offset: 5px; }
+#hero .landscape, #hero .poster, #valley, #hero .hero-scrim { position: absolute; inset: 0; width: 100%; height: 100%; }
+#hero .landscape { touch-action: pan-y; }
+#hero[data-ride="armed"] .landscape, #hero[data-ride="playing"] .landscape { cursor: grab; }
+#hero[data-ride="armed"] .landscape:active, #hero[data-ride="playing"] .landscape:active { cursor: grabbing; }
+#hero[data-motion="paused"] .landscape, #hero[data-motion="paused"] .landscape:active { cursor: default; }
+#hero .poster { object-fit: cover; }
+#valley { display: block; opacity: 0; }
+#hero[data-ready="true"] #valley { opacity: 1; }
+#hero[data-ready="true"] .poster { visibility: hidden; }
+#hero .hero-scrim { pointer-events: none; background: linear-gradient(180deg, #0b071c65, transparent 52%, transparent 72%, #0d091e9c), radial-gradient(ellipse at 13% 28%, #0a061cf2, #0a061c80 30%, transparent 65%); }
+#hero .hero-intro { position: absolute; left: max(7%, calc((100% - 1140px) / 2)); right: 7%; top: 19%; pointer-events: none; }
+#hero #hero-title { margin: 0; font: 450 clamp(42px, 4.3vw, 66px)/1.08 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: -.05em; text-transform: none; color: #f9ebe7; }
+#hero #hero-title em { font-style: normal; font-weight: inherit; color: #f4b2bf; }
+#hero .hero-intro p { max-width: 470px; margin: 26px 0 0; color: #cfbdce; font-size: 15px; line-height: 1.7; }
+#hero .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+#hero .hero-action { pointer-events: auto; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 0 20px; border: 1px solid transparent; border-radius: 5px; font-size: 12px; font-weight: 500; text-decoration: none; transition: background .2s, border-color .2s; }
+#hero .primary { background: #f5e9ec; color: #261529; }
+#hero .primary:hover { background: #fff; }
+#hero .primary span { font-size: 19px; }
+#hero .secondary { color: #f5e9ec; border-color: #c4a9c057; background: #25152c66; }
+#hero .secondary:hover { background: #3e284cbb; border-color: #d4b2ce; }
+#hero .ride-action { padding-inline: 13px; background: transparent; color: #dbc9d9; cursor: pointer; }
+#hero .ride-action:hover { background: #f5e9ec12; color: #fff; }
+#hero .ride-action[aria-pressed="true"] { min-width: 48px; padding-inline: 14px; border-color: #b99cc148; }
+#hero .ride-action[aria-pressed="true"] .ride-label, #hero .ride-action[aria-pressed="true"] .ride-play, #hero .ride-stop { display: none; }
+#hero .ride-action[aria-pressed="true"] .ride-stop { display: block; }
+#hero[data-ride="loading"] .ride-play { animation: ride-loading 1.5s ease-in-out infinite; }
+#hero .hero-controls { position: absolute; right: 5%; bottom: max(28px, env(safe-area-inset-bottom)); display: flex; gap: 10px; }
+#hero .hero-icon { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; padding: 0; border-radius: 50%; border: 1px solid #ae87aa66; color: #f5dfe6; background: #1c122dba; cursor: pointer; }
+#hero .hero-icon:hover { background: #422745; border-color: #d4b2ce; }
+#hero button:disabled { cursor: default; opacity: .45; }
+#hero .play-icon, #hero .sound-off { display: none; }
+#hero[data-motion="paused"] .pause-icon, #sound[aria-pressed="true"] .sound-on { display: none; }
+#hero[data-motion="paused"] .play-icon, #sound[aria-pressed="true"] .sound-off { display: block; }
+#hero .steering-hint { position: absolute; bottom: 17%; left: 50%; transform: translateX(-50%); color: #eddee9; pointer-events: none; animation: hint-pulse 2.8s ease-in-out infinite; }
+#hero .hint-hand { animation: hint-steer 2.8s ease-in-out infinite; }
+#hero[data-motion="paused"] .steering-hint, #hero[data-motion="paused"] .hint-hand,
+#hero[data-visible="false"] .steering-hint, #hero[data-visible="false"] .hint-hand { animation-play-state: paused; }
+#hero .hero-status { position: absolute; left: 7%; right: 7%; bottom: 30px; margin: 0; padding-right: 130px; font-size: 12px; color: #f5c3ce; pointer-events: none; }
+#hero .hero-status:empty { display: none; }
+@keyframes hint-pulse { 0%, 100% { opacity: .4; } 50% { opacity: .9; } }
+@keyframes hint-steer { 0%, 100% { transform: translateX(-5px); } 50% { transform: translateX(5px); } }
+@keyframes ride-loading { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@media (max-width: 700px) {
+  #hero.valley-hero { min-height: 620px; }
+  #hero .hero-intro { top: 17%; left: 7%; right: 7%; }
+  #hero #hero-title { font-size: clamp(34px, 9.6vw, 53px); line-height: 1.1; }
+  #hero .hero-intro p { font-size: 13px; line-height: 1.65; max-width: 310px; margin-top: 19px; }
+  #hero .desktop-break { display: none; }
+  #hero .hero-actions { gap: 10px; margin-top: 23px; max-width: 340px; }
+  #hero .hero-action { min-height: 46px; padding-inline: 16px; font-size: 11px; }
+  #hero .ride-action { margin-right: 140px; padding-inline: 0; }
+  #hero .ride-action[aria-pressed="true"] { padding-inline: 14px; }
+  #hero .hero-controls { right: 7%; bottom: max(24px, env(safe-area-inset-bottom)); }
+  #hero .steering-hint { bottom: 17%; }
+  #hero .hero-status { bottom: 80px; padding-right: 0; }
+}
+@media (max-height: 560px) and (min-width: 701px) {
+  #hero.valley-hero { min-height: 480px; }
+  #hero .hero-intro { top: 21%; }
+  #hero #hero-title { font-size: 37px; }
+  #hero .hero-intro p { font-size: 12px; margin-top: 14px; }
+  #hero .hero-actions { margin-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hero *, #hero *::before, #hero *::after { animation: none !important; transition: none !important; }
+}

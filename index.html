@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10091f">
+  <title>Playful Tones · Audio plugin development</title>
+  <meta name="description" content="Independent audio plugin development by Bence Kovács. DSP, black-box and grey-box modeling, user interfaces, and the engineering behind a commercial release.">
+  <link rel="canonical" href="https://playfultones.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://playfultones.com/">
+  <meta property="og:title" content="Playful Tones · Audio plugin development">
+  <meta property="og:description" content="Audio plugins and musical tools, from prototype to commercial release.">
+  <meta property="og:image" content="https://playfultones.com/assets/img/og-valley.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A wireframe valley road running toward a striped synthwave sun">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/favicon.png" sizes="32x32">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/home.css">
+  <link rel="stylesheet" href="scope/valley.css">
+</head>
+<body>
+  <a class="skip-link" href="#portfolio">Skip to selected work</a>
+  <main id="main">
+<section id="hero" class="valley-hero chapter" data-ride="idle" aria-labelledby="hero-title">
+            <div class="hero-brand"><a class="brand" href="#hero" aria-label="Playful Tones home">
+  <svg viewBox="0 0 28 30" width="25" height="28" fill="none" aria-hidden="true"><path d="M3 18V12M9 24V6M15 28V2M21 22V8M27 17V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <span>playful<span class="brand-light">tones</span><span class="brand-dot">.</span></span>
+</a></div>
+            <div id="landscape" class="landscape" tabindex="-1">
+                <picture aria-hidden="true">
+                    <source media="(max-width: 700px)" srcset="scope/valley-poster-mobile.svg">
+                    <img class="poster" src="scope/valley-poster.svg" alt="">
+                </picture>
+                <canvas id="valley" aria-hidden="true"></canvas>
+            </div>
+            <div class="hero-scrim" aria-hidden="true"></div>
+            <div class="hero-intro">
+                <h1 id="hero-title">Audio plugins<br><em>from prototype</em><br>to release</h1>
+                <p>I build plugins and musical tools for audio companies.</p>
+                <div class="hero-actions">
+                    <a href="#portfolio" class="hero-action primary">View selected work <span aria-hidden="true">↓</span></a>
+                    <a href="#contact" class="hero-action secondary">Get in touch</a>
+                    <button id="take-ride" disabled class="hero-action ride-action" type="button" aria-pressed="false" aria-controls="landscape">
+                        <svg class="ride-play" width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 4 9 6-9 6V4Z" fill="currentColor"/></svg>
+                        <svg class="ride-stop" width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="1" fill="currentColor"/></svg>
+                        <span class="ride-label">Take a ride</span>
+                    </button>
+                </div>
+            </div>
+            <div id="steering-hint" class="steering-hint" hidden aria-hidden="true">
+                <svg width="96" height="46" viewBox="0 0 96 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m14 17-6 6 6 6M8 23h16m58-6 6 6-6 6m6-6H72"/>
+                    <g class="hint-hand"><path d="M42 27V11a3 3 0 0 1 6 0v12-4a3 3 0 0 1 6 0v4-2a3 3 0 0 1 6 0v7c0 7-4 11-10 11h-2c-4 0-6-2-8-5l-6-8a3 3 0 0 1 4-4l4 5Z"/></g>
+                </svg>
+            </div>
+            <div class="hero-controls">
+                <button id="sound" class="hero-icon" type="button" hidden aria-label="Mute audio" aria-pressed="false" title="Mute audio">
+                    <svg class="sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Zm5 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+                    <svg class="sound-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Zm5 4 6 6m0-6-6 6"/></svg>
+                </button>
+                <button id="motion" disabled class="hero-icon" type="button" aria-label="Pause animation" aria-pressed="false" title="Pause animation">
+                    <svg class="pause-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 3h3v10H4zm5 0h3v10H9z"/></svg>
+                    <svg class="play-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="m5 3 8 5-8 5z"/></svg>
+                </button>
+            </div>
+            <p id="status" class="hero-status" role="status" aria-live="polite"></p>
+        <a class="scroll-next" href="#portfolio" aria-label="Scroll to selected work"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 4v16m-6-6 6 6 6-6"/></svg></a>
+        </section>
+
+<section id="portfolio" class="chapter work" aria-labelledby="work-title">
+  <div class="section-inner">
+    <div class="section-heading"><p class="section-label">Portfolio</p><h2 id="work-title">Selected audio work</h2></div>
+    <div class="project-grid">
+      <article class="project cathedral">
+        <a class="project-image" href="https://splinelaboratories.com/products/cathedral-plugin-coming-soon" target="_blank" rel="noopener">
+          <span class="project-status">Coming soon</span>
+          <img src="assets/img/previews/cathedral.webp" width="660" height="660" loading="lazy" decoding="async" alt="Cathedral by Spline Laboratories">
+        </a>
+        <div class="project-caption"><div><p>Spline Laboratories</p><h3><a href="https://splinelaboratories.com/products/cathedral-plugin-coming-soon" target="_blank" rel="noopener">Cathedral</a></h3></div><span aria-hidden="true">↗</span></div>
+      </article>
+<article class="project"><a class="project-image" href="https://bogrendigital.com/products/a-class-vocal" target="_blank" rel="noopener"><img src="assets/img/previews/A-Class_Vocal.webp" width="800" height="800" loading="lazy" decoding="async" alt="A-Class Vocal interface"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/a-class-vocal" target="_blank" rel="noopener">A-Class Vocal</a></h3></div><span aria-hidden="true">↗</span></div></article>
+<article class="project eqmachine"><a class="project-image" href="https://aiaiai.audio/software/eq-machine" target="_blank" rel="noopener"><img src="assets/img/portfolio/eq-machine-preview.webp" width="900" height="497" loading="lazy" decoding="async" alt="TMA-2 EQ MACHINE interface"></a><div class="project-caption"><div><p>AIAIAI</p><h3><a href="https://aiaiai.audio/software/eq-machine" target="_blank" rel="noopener">TMA-2 EQ MACHINE</a></h3></div><span aria-hidden="true">↗</span></div></article>
+    </div>
+    <details class="catalogue"><summary>More audio work <span aria-hidden="true">+</span></summary>
+      <div class="carousel work-carousel"><div class="carousel-controls" hidden><span class="carousel-position" aria-live="polite" aria-atomic="true"></span><button type="button" data-step="-1" aria-label="Previous project" aria-controls="more-work-track"><span aria-hidden="true">←</span></button><button type="button" data-step="1" aria-label="Next project" aria-controls="more-work-track"><span aria-hidden="true">→</span></button></div>
+        <div id="more-work-track" class="card-track" tabindex="0" role="region" aria-label="More audio work">
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/ampknob-duet" target="_blank" rel="noopener"><img src="assets/img/previews/Ampknob_Duet.webp" width="800" height="800" loading="lazy" decoding="async" alt="Ampknob Duet interface"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/ampknob-duet" target="_blank" rel="noopener">Ampknob Duet</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/ampknob-fatman" target="_blank" rel="noopener"><img src="assets/img/previews/Ampknob_Fatman.webp" width="800" height="800" loading="lazy" decoding="async" alt="Ampknob Fatman"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/ampknob-fatman" target="_blank" rel="noopener">Ampknob Fatman</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/irdx-studio" target="_blank" rel="noopener"><img src="assets/img/previews/IRDX_Studio_UI.webp" width="748" height="748" loading="lazy" decoding="async" alt="IRDX Studio"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/irdx-studio" target="_blank" rel="noopener">IRDX Studio</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/ampknob-bde-120" target="_blank" rel="noopener"><img src="assets/img/previews/Ampknob_BDE120.webp" width="552" height="552" loading="lazy" decoding="async" alt="Ampknob BDE 120"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/ampknob-bde-120" target="_blank" rel="noopener">Ampknob BDE 120</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/ampknob-bh4" target="_blank" rel="noopener"><img src="assets/img/previews/Ampknob_BH4.webp" width="800" height="800" loading="lazy" decoding="async" alt="Ampknob BH4"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/ampknob-bh4" target="_blank" rel="noopener">Ampknob BH4</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/pages/ampknob-bdm-bundle" target="_blank" rel="noopener"><img src="assets/img/previews/bdm.webp" width="800" height="800" loading="lazy" decoding="async" alt="Ampknob BDM Bundle"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/pages/ampknob-bdm-bundle" target="_blank" rel="noopener">Ampknob BDM Bundle</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/mlc-s_zero-93" target="_blank" rel="noopener"><img src="assets/img/previews/MLC_S_Zero93.webp" width="800" height="800" loading="lazy" decoding="async" alt="MLC S_Zero 93"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/mlc-s_zero-93" target="_blank" rel="noopener">MLC S_Zero 93</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/pages/ampknob-trivium-bundle" target="_blank" rel="noopener"><img src="assets/img/previews/TriviumAmpknobRhythm.webp" width="800" height="800" loading="lazy" decoding="async" alt="Trivium Ampknob Bundle"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/pages/ampknob-trivium-bundle" target="_blank" rel="noopener">Trivium Ampknob Bundle</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/ampknob-mlc-s_zero-100" target="_blank" rel="noopener"><img src="assets/img/previews/Ampknob_S_Zero100_UI_red_Frame_square.webp" width="800" height="800" loading="lazy" decoding="async" alt="Ampknob — MLC S_Zero 100"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/ampknob-mlc-s_zero-100" target="_blank" rel="noopener">Ampknob — MLC S_Zero 100</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://bogrendigital.com/products/irdx-core" target="_blank" rel="noopener"><img src="assets/img/previews/IRDX_Core_UI_withWindow.webp" width="800" height="800" loading="lazy" decoding="async" alt="IRDX Core"></a><div class="project-caption"><div><p>Bogren Digital</p><h3><a href="https://bogrendigital.com/products/irdx-core" target="_blank" rel="noopener">IRDX Core</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://plugins.musictribe.com/behringer/0723-AAD" target="_blank" rel="noopener"><img src="assets/img/previews/Image_BE_0723-AAD_VINTAGE_Front2_XL.webp" width="800" height="800" loading="lazy" decoding="async" alt="Vintage"></a><div class="project-caption"><div><p>Behringer</p><h3><a href="https://plugins.musictribe.com/behringer/0723-AAD" target="_blank" rel="noopener">Vintage</a></h3></div><span aria-hidden="true">↗</span></div></article>
+      <article class="project"><a class="project-image" href="https://www.recordgames.co.uk/" target="_blank" rel="noopener"><img src="assets/img/previews/starstruck-galaxy.webp" width="662" height="662" loading="lazy" decoding="async" alt="Starstruck Galaxy"></a><div class="project-caption"><div><p>Record Games</p><h3><a href="https://www.recordgames.co.uk/" target="_blank" rel="noopener">Starstruck Galaxy</a></h3></div><span aria-hidden="true">↗</span></div></article>
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="services" class="chapter services" aria-labelledby="services-title">
+  <div class="section-inner services-layout">
+    <div class="section-heading"><p class="section-label">What I do</p><h2 id="services-title">Audio plugin<br> development<br> services</h2><a class="text-link" href="#contact">Discuss a project <span aria-hidden="true">↓</span></a></div>
+    <div class="service-list">
+      <article class="service"><div class="service-heading"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.67" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M10 10v12m12-12v12M7 15h6m6 4h6"/></svg></span><h3 class="service-title">Plugin development</h3></div><p>DSP, user interfaces and application logic. I can build a product from the first prototype or work alongside your existing team.</p></article>
+      <article class="service"><div class="service-heading"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.0 16.0 L4.8 14.0 L5.5 12.2 L6.2 10.4 L7.0 8.9 L7.8 7.7 L8.5 6.8 L9.2 6.2 L10.0 6.0 L10.8 6.2 L11.5 6.8 L12.2 7.7 L13.0 8.9 L13.8 10.4 L14.5 12.2 L15.2 14.0 L16.0 16.0 L16.8 18.0 L17.5 19.8 L18.2 21.6 L19.0 23.1 L19.8 24.3 L20.5 25.2 L21.2 25.8 L22.0 26.0 L22.8 25.8 L23.5 25.2 L24.2 24.3 L25.0 23.1 L25.8 21.6 L26.5 19.8 L27.2 18.0 L28.0 16.0"/><circle cx="4" cy="16" r="2.4" fill="currentColor" stroke="none"/><circle cx="10" cy="6" r="2.4" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="2.4" fill="currentColor" stroke="none"/><circle cx="22" cy="26" r="2.4" fill="currentColor" stroke="none"/><circle cx="28" cy="16" r="2.4" fill="currentColor" stroke="none"/></svg></span><h3 class="service-title">Black-box &amp; grey-box modeling</h3></div><p>Hardware character captured in software, using measured behavior and circuit knowledge. Models designed for the sound and the real-time budget.</p></article>
+      <article class="service"><div class="service-heading"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 1024 1024" width="28" height="28" fill="currentColor"><path transform="translate(0 960) scale(1 -1)" d="M892.587 858.453c-43.83 10.256-94.172 16.16-145.884 16.213h-0.036c-6.678 0.451-14.475 0.708-22.332 0.708-89.818 0-171.788-33.599-234.027-88.915l0.359 0.313q-68.693-68.693-136.107-136.96c-51.627 5.547-174.080 8.533-256-74.24-7.668-7.712-12.407-18.343-12.407-30.080s4.74-22.368 12.409-30.082l-0.002 0.002 482.133-482.987c7.712-7.668 18.343-12.407 30.080-12.407s22.368 4.74 30.082 12.409l-0.002-0.002c83.2 85.333 80.64 205.653 75.52 256l136.96 136.533c136.107 136.107 74.24 391.68 71.68 402.347-4.109 15.678-16.524 27.666-32.144 31.095l-0.283 0.052zM791.893 485.12l-151.893-151.040c-7.634-7.706-12.35-18.314-12.35-30.023 0-2.965 0.302-5.859 0.878-8.653l-0.047 0.276c2.364-13.924 3.716-29.963 3.716-46.319 0-44.185-9.862-86.066-27.506-123.563l0.751 1.775-412.587 413.44c34.907 16.459 75.822 26.066 118.982 26.066 18.274 0 36.145-1.722 53.461-5.013l-1.776 0.281c1.655-0.227 3.567-0.357 5.509-0.357 12.517 0 23.775 5.39 31.58 13.976l0.031 0.035s59.733 61.867 149.76 151.893c47.879 38.701 109.498 62.127 176.588 62.127 6.925 0 13.791-0.25 20.59-0.74l-0.912 0.053c35.244-0.18 69.631-3.277 103.098-9.060l-3.685 0.527c10.24-61.013 26.453-215.040-54.187-295.68zM756.48 605.867c0-47.128-38.205-85.333-85.333-85.333s-85.333 38.205-85.333 85.333c0 47.128 38.205 85.333 85.333 85.333s85.333-38.205 85.333-85.333zM213.333 277.333c-85.333-42.667-85.333-213.333-85.333-213.333 82.38 2.423 156.858 34.381 213.628 85.595l-0.295-0.262z"/></svg></span><h3 class="service-title">Builds, testing &amp; release</h3></div><p>VST3, AU and AAX on macOS and Windows. Build and test automation, signing, installers, copy protection, the whole nine yards.</p></article>
+      <article class="service"><div class="service-heading"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 1024 1024" width="28" height="28" fill="currentColor"><path transform="translate(0 960) scale(1 -1)" d="M218.539 64c16.128-16.128 37.547-25.003 60.331-25.003s44.203 8.875 60.331 25.003l185.003 185.003c28.192-9.013 60.62-14.208 94.262-14.208 0.116 0 0.232 0 0.348 0h-0.018c0.288-0.001 0.63-0.001 0.971-0.001 88.029 0 167.696 35.803 225.234 93.641l0.013 0.014c57.974 57.817 93.843 137.774 93.843 226.108 0 44.001-8.9 85.923-24.997 124.064l0.786-2.098-24.32 59.221-181.077-181.035-90.496 90.539 181.035 181.035-59.264 24.363c-35.902 15.192-77.648 24.022-121.457 24.022-0.155 0-0.311 0-0.466 0h0.024c-85.461 0-165.803-33.28-226.176-93.696-57.97-57.783-93.838-137.71-93.838-226.014 0-33.825 5.263-66.421 15.014-97.013l-0.622 2.26-185.003-185.003c-15.427-15.446-24.967-36.774-24.967-60.331s9.54-44.885 24.968-60.332l90.538-90.538zM412.587 439.083l-10.837 26.283c-11.249 26.448-17.788 57.212-17.788 89.503 0 64.766 26.304 123.388 68.811 165.766l0.006 0.006c42.21 42.477 100.665 68.768 165.261 68.768 8.109 0 16.122-0.414 24.018-1.223l-0.991 0.082-143.061-143.061 211.157-211.2 143.147 143.147c0.695-6.772 1.092-14.633 1.092-22.587 0-64.781-26.297-123.42-68.799-165.824l-0.004-0.004c-66.133-66.133-169.131-86.485-255.317-51.029l-26.24 10.88-224.128-224.256-0.043-42.667v42.667l-90.539 90.539 224.256 224.213z"/></svg></span><h3 class="service-title">Support &amp; maintenance</h3></div><p>Profiling, optimization and refactoring of existing products. Keeping your shipped plugins alive through host and OS updates.</p></article>
+      <article class="service"><div class="service-heading"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 1024 1024" width="28" height="28" fill="currentColor"><path transform="translate(0 960) scale(1 -1)" d="M853.333 832h-682.667c-47.128 0-85.333-38.205-85.333-85.333v0-170.667c0-47.128 38.205-85.333 85.333-85.333v0h682.667c47.128 0 85.333 38.205 85.333 85.333v0 170.667c0 47.128-38.205 85.333-85.333 85.333v0zM170.667 576v170.667h682.667v-170.667zM853.333 405.333h-682.667c-47.128 0-85.333-38.205-85.333-85.333v0-170.667c0-47.128 38.205-85.333 85.333-85.333v0h682.667c47.128 0 85.333 38.205 85.333 85.333v0 170.667c0 47.128-38.205 85.333-85.333 85.333v0zM170.667 149.333v170.667h682.667v-170.667zM725.333 704h85.333v-85.333h-85.333zM597.333 704h85.333v-85.333h-85.333zM725.333 277.333h85.333v-85.333h-85.333zM597.333 277.333h85.333v-85.333h-85.333z"/></svg></span><h3 class="service-title">Supporting software</h3></div><p>Web services, telemetry and development tools. New ones, or integrations with what you already run.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="chapter about" aria-labelledby="about-title">
+  <div class="section-inner">
+    <div class="about-intro">
+      <div class="about-heading"><p class="section-label">About</p><h2 id="about-title">Hi, I’m Bence</h2><p class="about-role">I’m an independent audio software developer based in Denmark, working remotely with teams in Europe and North America.</p></div>
+      <div class="about-copy"><p>I work directly with product teams, designers and audio specialists. That can mean taking a new idea through to a finished plugin, or joining an existing codebase to solve a particular problem.</p></div>
+      <img class="portrait" src="blog/img/blog-author.webp" width="1427" height="1427" loading="lazy" decoding="async" alt="Bence Kovács">
+    </div>
+    <div id="testimonials" class="testimonials"><h3 class="section-label">Client feedback</h3>
+      <div class="carousel feedback-carousel"><div class="carousel-controls" hidden><span class="carousel-position" aria-live="polite" aria-atomic="true"></span><button type="button" data-step="-1" aria-label="Previous testimonial" aria-controls="feedback-track"><span aria-hidden="true">←</span></button><button type="button" data-step="1" aria-label="Next testimonial" aria-controls="feedback-track"><span aria-hidden="true">→</span></button></div>
+        <div id="feedback-track" class="card-track" tabindex="0" role="region" aria-label="Client feedback">
+<figure class="quote"><blockquote>“Bence is a brilliant engineer – dependable, process-oriented, and, above all, someone who takes initiative, always finding ways to automate and streamline. He’s a calm, collaborative presence who helped set Bogren Digital up for long-term success through well-organized code, smart automation, and faster releases. Any team would be lucky to have him.”</blockquote><figcaption><img src="assets/img/previews/jaceksniecikowski.webp" width="64" height="64" loading="lazy" decoding="async" alt="Jacek Sniecikowski"><div><b>Jacek Sniecikowski</b><span>Bogren Digital</span></div></figcaption></figure>
+<figure class="quote"><blockquote>“It’s been a pleasure working with Bence on AIAIAI’s EQ Machine plugin. Communication and collaboration between Bence, myself and the graphics design team was seamless and always easy. The final product Bence developed feels very professional and user friendly. Prototypes and beta versions had nice built-in features to make testing and EQ design simple, always delivered on time. I look forward to working with playfultones on future plugins!”</blockquote><figcaption><img src="assets/img/previews/tomfletcher.webp" width="64" height="64" loading="lazy" decoding="async" alt="Tom Fletcher"><div><b>Tom Fletcher</b><span>AIAIAI</span></div></figcaption></figure>
+<figure class="quote"><blockquote>“Bence was an absolute pleasure to work with – professional, communicative, and deeply committed to the success of the project. He consistently delivered above and beyond expectations, building features with care and precision while providing exceptional follow-up support. His technical expertise and proactive approach made collaboration effortless, and the final result was not only robust but elegantly designed for future growth.”</blockquote><figcaption><img src="assets/img/previews/robertedgington.webp" width="64" height="64" loading="lazy" decoding="async" alt="Robert Edgington"><div><b>Robert Edgington</b><span>Record Games</span></div></figcaption></figure>
+<figure class="quote"><blockquote>“Bence is an incredible engineer who combines deep expertise in audio development with an intuitive understanding of his clients’ needs. He took the time to understand my game’s requirements and built a robust, modular, and adaptable audio engine that could evolve iteratively along with the rest of the project.”</blockquote><figcaption><img src="assets/img/previews/michaelsamuels.webp" width="64" height="64" loading="lazy" decoding="async" alt="Michael Samuels"><div><b>Michael Samuels</b><span>Big Bang Games</span></div></figcaption></figure>
+<figure class="quote"><blockquote>“Bence was a valuable member of my team at Music Tribe, where he significantly enhanced our audio plugin development with his expertise in programming, automation, and workflow optimization. His talent for code refactoring and modularization greatly improved our project’s architecture, and his team-oriented, humble nature contributed immensely to our collaborative success and positive work environment.”</blockquote><figcaption><img src="assets/img/previews/jensbrosbol.webp" width="64" height="64" loading="lazy" decoding="async" alt="Jens Brosbøl-Ravnborg"><div><b>Jens Brosbøl-Ravnborg</b><span>XMT Audio</span></div></figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="speaking" class="chapter speaking" aria-labelledby="speaking-title">
+  <div class="section-inner">
+    <div class="section-heading"><p class="section-label">Audio Developer Conference</p><h2 id="speaking-title">Talks &amp; community</h2></div>
+    <a class="talk talk-featured" href="https://conference.audio.dev/session/2026/dont-break-the-session/" target="_blank" rel="noopener">
+      <div class="talk-meta"><span>ADC 2026</span><time datetime="2026-11-09">9 November</time></div>
+      <div><h3>Don’t Break<br>the Session</h3><p>Updating a plugin catalog without breaking saved projects. Regression testing against the builds people already use.</p></div>
+      <span class="talk-arrow" aria-hidden="true">↗</span>
+    </a>
+    <div class="talk-list">
+      <a href="https://audio.dev/adcx-copenhagen-26/" target="_blank" rel="noopener"><span>ADCx Copenhagen 2026</span><strong>Co-organizer</strong><span aria-hidden="true">↗</span></a>
+      <a href="https://conference.audio.dev/session/2025/psd-to-daw/" target="_blank" rel="noopener"><span>ADC 2025</span><strong>PSD to DAW</strong><span aria-hidden="true">↗</span></a>
+      <a href="https://conference.audio.dev/session/2024/building-a-plugin-assembly-line-the-road-to-rapid-plugin-development/" target="_blank" rel="noopener"><span>ADC 2024</span><strong>Building a Plugin Assembly Line</strong><span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="chapter contact" aria-labelledby="contact-title">
+  <div class="section-inner">
+    <div class="contact-layout">
+      <div class="section-heading"><p class="section-label">Get in touch</p><h2 id="contact-title">Tell me about<br>your plugin</h2><p class="section-intro">A new product, an existing codebase, or a release that needs attention. What are you working on, and where could you use a hand?</p></div>
+      <form action="https://formspree.io/f/xjvqqykn" method="post" class="contact-form">
+        <div class="form-pair"><div><label for="name">Name</label><input id="name" name="name" type="text" autocomplete="name" autocapitalize="words" required></div><div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" spellcheck="false" required></div></div>
+        <label for="subject">Subject</label><input id="subject" name="subject" type="text" autocomplete="off" required>
+        <label for="message">A little about the project</label><textarea id="message" name="message" rows="4" required></textarea>
+        <button class="submit-button" type="submit"><span class="submit-label">Send message</span> <span aria-hidden="true">↗</span></button>
+        <p class="form-status" role="status" aria-live="polite" hidden></p>
+      </form>
+    </div>
+    <footer class="site-footer"><a class="brand" href="#hero" aria-label="Playful Tones home">
+  <svg viewBox="0 0 28 30" width="25" height="28" fill="none" aria-hidden="true"><path d="M3 18V12M9 24V6M15 28V2M21 22V8M27 17V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <span>playful<span class="brand-light">tones</span><span class="brand-dot">.</span></span>
+</a><p>© 2023–2026 Playful Tones</p><a href="#hero">Back to top <span aria-hidden="true">↑</span></a></footer>
+  </div>
+</section>
+  </main>
+  <script type="module" src="assets/js/home.js"></script>
+  <script type="module" src="scope/valley-main.js"></script>
+</body>
+</html>

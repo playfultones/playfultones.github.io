@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<title>Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 2 | Playful Tones</title>
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  name="description"
+/>
+<meta
+  content="Audio Plugins, VST Development, AU Plugins, AAX Audio Tools, Plugin Prototyping, Commercial Plugin Launch, Audio Software, Mac and PC Plugins, DAW Compatibility, Plugin Coding, Game Audio, VR Audio"
+  name="keywords"
+/>
+
+<!-- Canonical URL + Open Graph (absolute URLs, always the production domain) -->
+<link href="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-2" rel="canonical" />
+<meta content="website" property="og:type" />
+<meta content="https://playfultones.com/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-2" property="og:url" />
+<meta content="Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 2 | Playful Tones" property="og:title" />
+<meta
+  content="Playful Tones: The playful side of music tech innovation."
+  property="og:description"
+/>
+
+<!-- Favicons -->
+<link href="/assets/img/favicon.png" rel="icon" />
+<link href="/assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+  rel="stylesheet"
+/>
+
+<!-- Vendor CSS Files -->
+<link href="/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link
+  href="/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+<link href="/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+<link href="/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet" />
+<link href="/assets/vendor/remixicon/remixicon.css" rel="stylesheet" />
+<link href="/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/vendor/highlight/styles/default.min.css" />
+
+<!-- Main CSS File -->
+<link href="/assets/css/style.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top header-inner-pages"><div class="container d-flex align-items-center justify-content-between">
+  <h1 class="logo"><a href="/">Playful Tones</a></h1>
+  <nav id="navbar" class="navbar">
+    <ul>
+      <li><a class="nav-link scrollto" href="/#hero">Home</a></li>
+      <li><a class="nav-link scrollto" href="/#about">About</a></li>
+      <li>
+        <a class="nav-link scrollto" href="/#services">Services</a>
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="/#portfolio"
+          >Portfolio</a
+        >
+      </li>
+      <li>
+        <a class="nav-link scrollto" href="/#testimonials"
+          >Testimonials</a
+        >
+      </li>
+      <li><a class="active" href="/blog">Blog</a></li>
+      <li>
+        <a class="nav-link scrollto" href="/#contact">Contact</a>
+      </li>
+    </ul>
+    <i class="bi bi-list mobile-nav-toggle"></i>
+  </nav>
+  <!-- .navbar -->
+</div>
+</header>
+    <!-- End Header -->
+
+    <main id="main">
+      <!-- ======= Breadcrumbs ======= -->
+      <section id="breadcrumbs" class="breadcrumbs">
+        <div class="container"><ol>
+<li><a href="/">Home</a></li>
+<li><a href="/blog">Blog</a></li>
+<li>Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 2</li>
+</ol></div>
+      </section>
+      <!-- End Breadcrumbs -->
+
+      <!-- ======= Blog Single Section ======= -->
+      <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+          <div class="row">
+            <div class="col-lg-8 entries">
+              <article class="entry entry-single">
+                <div class="entry-img">
+                  <img
+                    src="/blog/img/adc2025talk.webp"
+                    alt=""
+                    class="img-fluid" />
+                </div>
+
+                <h2 class="entry-title">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 2</h2>
+
+                <div class="entry-meta">
+                  <ul>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-person"></i>
+                      Bence Kovács
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <i class="bi bi-clock"></i>
+                      <time datetime="29-05-2026">29-05-2026</time>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="entry-content"><h2 id="introduction">Introduction</h2>
+<p>This is the second installment of my extended notes from the ADC 2025 talk in Bristol. <a href="/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1" target="_blank" rel="noopener noreferrer">Part 1</a> covered the dynamic UI loader: how we generate XML metadata from a Photoshop document, how the factory pattern builds the component tree, and how sorting layers replace JUCE's add-order Z-stack. This post picks up where that left off and covers what happens when the user resizes the window.</p>
+<p>Three topics, in roughly the order we worked through them:</p>
+<ul>
+<li>Making components keep their relative positions and sizes at arbitrary window dimensions.</li>
+<li>Keeping image quality high while resampling, without burning CPU on every paint.</li>
+<li>Actually measuring whether either of the above is working, with an evaluation tool we call CRISP.</li>
+</ul>
+<p>Same setup as before: JUCE's native renderer, no web views. Terms in <strong>bold</strong> are defined in the <a href="#glossary">glossary</a> at the end. Slides are <a href="https://docs.google.com/presentation/d/19U6x_GaPV0pajpXU6DusMa4kM_WX52s9qK27FA2WyDk/view" target="_blank" rel="noopener noreferrer">here</a>, public modules are <a href="https://github.com/Bogren-Digital/PSD-to-DAW" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h3 id="table-of-contents">Table of Contents</h3>
+<ul>
+<li><a href="#introduction">Introduction</a>
+<ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+</ul>
+</li>
+<li><a href="#sorting-layers-in-practice">Sorting Layers in Practice</a></li>
+<li><a href="#smooth-resizing">Smooth Resizing</a>
+<ul>
+<li><a href="#the-naive-baseline">The Naive Baseline</a></li>
+<li><a href="#per-component-affinetransform">Per-Component AffineTransform</a></li>
+<li><a href="#container-level-scaling">Container-Level Scaling</a></li>
+<li><a href="#the-fractional-offset-trick">The Fractional-Offset Trick</a></li>
+</ul>
+</li>
+<li><a href="#resampling">Resampling</a>
+<ul>
+<li><a href="#lanczos-and-the-alpha-edge-problem">Lanczos and the Alpha Edge Problem</a></li>
+<li><a href="#deferred-resampling">Deferred Resampling</a></li>
+<li><a href="#skipping-resampling-on-retina">Skipping Resampling on Retina</a></li>
+</ul>
+</li>
+<li><a href="#did-we-actually-get-it-right">Did We Actually Get It Right?</a>
+<ul>
+<li><a href="#why-eyeballing-doesnt-scale">Why Eyeballing Doesn't Scale</a></li>
+<li><a href="#ssim-gmsd-lpips">SSIM, GMSD, LPIPS</a></li>
+<li><a href="#optimizing-the-hot-path">Optimizing the Hot Path</a></li>
+<li><a href="#the-real-time-architecture">The Real-Time Architecture</a></li>
+<li><a href="#what-pixel-perfect-actually-means">What Pixel-Perfect Actually Means</a></li>
+</ul>
+</li>
+<li><a href="#closing">Closing</a></li>
+<li><a href="#glossary">Glossary</a></li>
+</ul>
+<h2 id="sorting-layers-in-practice">Sorting Layers in Practice</h2>
+<p>Part 1 named sorting layers in the glossary but left them there. This is where we actually dig into them.</p>
+<p>Every component gets an explicit integer sort order from a <code>SortingLayerManager</code>. Doesn't matter when it was added or which class added it. Named constants give anchor points; the gaps are the room you actually use:</p>
+<pre><code class="language-cpp">sortingLayerManager = std::make_unique&lt;PlayfulTones::SortingLayerManager&gt; (uiContainer);
+
+if (auto* backgroundComp = uiLoader-&gt;getComponentByName (&quot;Background&quot;))
+    sortingLayerManager-&gt;setSortingLayer (*backgroundComp,
+        PlayfulTones::SortingLayerManager::Layer::Background);
+
+if (auto* ledComp = uiLoader-&gt;getComponentByName (&quot;background_LED_On&quot;))
+    sortingLayerManager-&gt;setSortingLayer (*ledComp,
+        PlayfulTones::SortingLayerManager::Layer::Background + 1);
+
+if (auto* cablesComp = uiLoader-&gt;getComponentByName (&quot;Cables&quot;))
+    sortingLayerManager-&gt;setSortingLayer (*cablesComp,
+        PlayfulTones::SortingLayerManager::Layer::Background + 1);
+</code></pre>
+<p><code>Background</code> is <code>0</code>. <code>Content</code> is <code>100</code>. <code>Overlay</code> is <code>200</code>. <code>Tooltip</code> is <code>300</code>. <code>Background + 1</code> for the LED that sits just above the wood panel but below the controls. <code>Content + 5</code> for that one knob that has to render after the others because its highlight overlaps them.</p>
+<p>If you're maintaining a derived editor class that adds plugin-specific overlays on top of a shared base layout, this pattern is the difference between &quot;works first try&quot; and &quot;works until you change something.&quot;</p>
+<h2 id="smooth-resizing">Smooth Resizing</h2>
+<p>The Assembly PSD has a native resolution. Ours is 2430x1600 for one of the amp plugins. Every position and size in the Layout Definition is expressed in those native coordinates. The user resizes the window to 1215x800, or 1458x960, or anything else in between (aspect ratio locked to the native 243:160), and the UI has to look right at that size. No stepped increments. No perceptible quality cliff.</p>
+<p>JUCE gives you several ways to scale a UI to an arbitrary window size, and they trade cleanliness against image quality in different places. We worked through four, from the simplest to the one we shipped. None is strictly wrong; each is the right call in some situation and the wrong one in others. Here they are, with the problem each runs into and where it actually fits.</p>
+<h3 id="the-naive-baseline">The Naive Baseline</h3>
+<p>The obvious first version of <code>applyLayout()</code>:</p>
+<pre><code class="language-cpp">const int scaledX = (compX * targetWidth) / sourceWidth;
+const int scaledY = (compY * targetHeight) / sourceHeight;
+const int scaledWidth = (compWidth * targetWidth) / sourceWidth;
+const int scaledHeight = (compHeight * targetHeight) / sourceHeight;
+component-&gt;setBounds (scaledX, scaledY, scaledWidth, scaledHeight);
+</code></pre>
+<p>Two problems show up immediately.</p>
+<p>Accumulated rounding error: a knob at <code>x=1200</code> in a 2430-wide bitmap, rendered into a 1600-wide window, lands at <code>floor(1200 * 1600 / 2430) = 790</code> instead of <code>790.12</code>. Sub-pixel, sure, but the next knob over does the same in the opposite direction, and the visible spacing between them is wrong in a way you can put a ruler on.</p>
+<p>Adjacent components no longer share an edge: a switch's right edge at native <code>x=553</code> and the next switch's left edge at native <code>x=554</code> both round to the same integer at some scales and to different integers at others. As you drag the resize handle, the seams open and close.</p>
+<p><strong>When it's fine:</strong> if the window only ever snaps to a few fixed integer scale factors (1x, 2x), every coordinate lands on a whole pixel and there's nothing to round. <strong>When it isn't:</strong> the moment the window can be any width, the integer-math approach can't be saved. We support continuous resizing, so we needed sub-pixel positioning.</p>
+<h3 id="per-component-affinetransform">Per-Component AffineTransform</h3>
+<p>Lift each component into float space and let JUCE's <code>AffineTransform</code> handle the math. The helper that builds the transform:</p>
+<pre><code class="language-cpp">juce::AffineTransform ComponentResizer::getRectTransform (
+    const juce::Rectangle&lt;float&gt;&amp; source,
+    const juce::Rectangle&lt;float&gt;&amp; target)
+{
+    const float newX = target.getX();
+    const float newY = target.getY();
+
+    const float scaleX = target.getWidth()  / source.getWidth();
+    const float scaleY = target.getHeight() / source.getHeight();
+
+    return juce::AffineTransform::translation (-source.getX(), -source.getY())
+        .scaled (scaleX, scaleY)
+        .translated (newX, newY);
+}
+</code></pre>
+<p>The order matters. A component at native <code>(1200, 300)</code> with size <code>(580, 560)</code> lives at an arbitrary offset in design space. A naive <code>scaled(scaleX, scaleY)</code> would scale the offset too, and the knob would end up somewhere over by the speaker grille. Translate-to-origin, then scale, then translate-to-target. Each component gets its own transform, computed once per resize.</p>
+<p>This fixed the seams. It introduced two new symptoms.</p>
+<p>The first is image quality. <code>setTransform</code> on a <code>juce::Component</code> that paints an image means JUCE samples the source bitmap through the transform on every paint. For photorealistic background textures the result is acceptable. For sharp edges (the LED bezel, the silver ring around a knob) it gets mushy.</p>
+<p>The second is jitter. As the user drags the resize handle, the transform's scale factor changes continuously, and what was previously a clean pixel-aligned edge starts dancing around by fractions of a pixel. Static screenshots looked fine. Live drags didn't.</p>
+<p><strong>When it's fine:</strong> if your assets are all soft photographic textures and resizing is a rare, discrete action rather than a live drag, the mushiness and jitter never really surface. <strong>When it isn't:</strong> sharp edges and a continuously moving scale factor, which is exactly the skeuomorphic-UI-with-drag-resize case. So we tried the opposite extreme.</p>
+<h3 id="container-level-scaling">Container-Level Scaling</h3>
+<p>Lay every component out at native resolution inside the <code>uiContainer</code>, then scale the whole container as one transform:</p>
+<pre><code class="language-cpp">void BDMEditor::resized()
+{
+    uiLoader-&gt;applyLayout();
+
+    const float zoomFactor = static_cast&lt;float&gt; (getWidth())
+                           / static_cast&lt;float&gt; (getRefWidth());
+    uiContainer.setTransform (juce::AffineTransform().scaled (zoomFactor));
+}
+</code></pre>
+<p><code>applyLayout()</code> reverts to integer bounds at native coordinates; the parent <code>setTransform</code> does the scaling. One transform for the entire UI tree.</p>
+<p>Cheap. Clean. Wrong.</p>
+<p>JUCE now rasterizes the entire UI through a single affine transform on every paint pass. Every knob frame, every switch graphic, every backplate gets resampled together. That's not a CPU disaster on a modern machine, but it's worse than necessary. The real problem is image quality: when you down-resample a 2430x1600 RGBA composite to 1215x800 every frame, fine detail in any individual component is gone. And if you have SVG assets that you rasterized at native resolution, you're now down-resampling pre-rasterized SVG content, which is the worst possible input for any resampler.</p>
+<p>The deeper reason sits in JUCE's paint model. Vector primitives (<code>g.fillRoundedRectangle</code>, <code>g.drawLine</code>) honour the current transform and rasterize once at the target resolution. They stay sharp at any scale. Images don't get that treatment: <code>g.drawImage</code> rasterizes the bitmap into the current coordinate system using whatever resampling quality is set. The container-level transform collapses everything into the second category.</p>
+<p><strong>When it's fine:</strong> prototypes, and UIs built entirely from vector primitives (<code>g.fillRoundedRectangle</code>, <code>g.drawLine</code>) that honour the transform and rasterize sharp at any scale. <strong>When it isn't:</strong> a bitmap-heavy skeuomorphic UI like ours, where the single container transform collapses every image into one blurry resample. Pixel-perfect quality trumps the &quot;one cheap transform&quot; appeal here.</p>
+<h3 id="the-fractional-offset-trick">The Fractional-Offset Trick</h3>
+<p>The insight that finally worked: we want sub-pixel positioning so the seams stay shut, but we don't want a per-component transform that re-rasterizes the image every paint. What if the component's <em>bounds</em> are integer, but the component knows about its own fractional offset and draws its image into a sub-pixel rect?</p>
+<p>The layout pass computes the float-precise target rectangle, then:</p>
+<pre><code class="language-cpp">auto newIntX      = juce::roundToInt (std::floor (floatX));
+auto newIntY      = juce::roundToInt (std::floor (floatY));
+auto newIntRight  = juce::roundToInt (std::ceil  (floatX + floatWidth));
+auto newIntBottom = juce::roundToInt (std::ceil  (floatY + floatHeight));
+
+auto fractionalX = juce::jlimit (-1.f, 1.f, floatX - static_cast&lt;float&gt; (newIntX));
+auto fractionalY = juce::jlimit (-1.f, 1.f, floatY - static_cast&lt;float&gt; (newIntY));
+
+component-&gt;setBounds (newIntX, newIntY, newIntRight - newIntX, newIntBottom - newIntY);
+component-&gt;getProperties().set (&quot;floatX&quot;, fractionalX);
+component-&gt;getProperties().set (&quot;floatY&quot;, fractionalY);
+component-&gt;getProperties().set (&quot;floatW&quot;, floatWidth);
+component-&gt;getProperties().set (&quot;floatH&quot;, floatHeight);
+</code></pre>
+<p>Two details to flag. The integer bounds always grow outward: <code>floor</code> for the top-left, <code>ceil</code> for the bottom-right. The component's surface is the <em>smallest</em> integer rectangle that <em>fully contains</em> the float-precise target. That extra fraction of a pixel of margin is what prevents the image from getting clipped at the edges when it sits at a sub-pixel offset inside the container.</p>
+<p>The fractional offset and the float-precise dimensions get stashed on the component's properties. Components read them at paint time:</p>
+<pre><code class="language-cpp">void ImageComponent::paint (juce::Graphics&amp; g)
+{
+    g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+    g.drawImage (image, getFloatRect (*this), juce::RectanglePlacement::stretchToFit);
+}
+</code></pre>
+<p><code>drawImage (image, floatRect, stretchToFit)</code> rasterizes the bitmap straight into the float rect <em>inside</em> the integer-bounded surface. JUCE does the sub-pixel placement and the scaling in a single pass. There's no per-component <code>setTransform</code>, the container has no transform, and Component bounds are still integers so JUCE's hit testing and child layout work the way they were designed to.</p>
+<p>The cost is a little bookkeeping: the layout pass has to stash the float rect on each component, and every image component needs a paint path that reads it back. Cheap for what it buys, and it's the one approach here with no failure mode we had to design around. This is what shipped. If you read the public <a href="https://github.com/Bogren-Digital/bd_ui_loader" target="_blank" rel="noopener noreferrer"><code>bd_ui_loader</code></a> source today, this is what <code>applyLayoutToComponent</code> does.</p>
+<h2 id="resampling">Resampling</h2>
+<p>Sub-pixel layout solved the placement question. Image quality at non-Retina scales was still a problem.</p>
+<h3 id="lanczos-and-the-alpha-edge-problem">Lanczos and the Alpha Edge Problem</h3>
+<p>JUCE's default image resampling is fast and produces blurry results at non-trivial scale factors. We were already routing image draws through a Lanczos resampler (via the <a href="https://github.com/FigBug/Gin" target="_blank" rel="noopener noreferrer">gin</a> library's <code>applyResize</code>) before drawing. Lanczos is great for downscaling photorealistic content. Sharp without being noisy.</p>
+<p>But Lanczos has a well-known property: overshoot near hard transitions. On a knob silhouette with a fully transparent background, Lanczos overshoots at the alpha edge and the result has visible halos and colour fringes around the knob.</p>
+<p>We prototyped a fix: a two-pass composite. Lanczos the colour image at high quality, rescale a separate alpha mask at low quality (the mask only needs to define <em>where</em> the knob is, not what it looks like), then keep the Lanczos output only where the mask is opaque and drop everything outside it. The mask was an optional output from the Photoshop exporter, a single silhouette layer at the component's bounds.</p>
+<pre><code class="language-cpp">juce::Image highQualResampledImage = gin::applyResize (img, width, height,
+    gin::ResizeAlgorirm::lanczos); // the gin enum really is spelled &quot;Algorirm&quot;
+
+juce::Image scaledDownMask = resamplingMask.rescaled (width, height,
+    juce::Graphics::ResamplingQuality::lowResamplingQuality);
+
+juce::Image maskedImage (juce::Image::ARGB, width, height, true);
+for (int y = 0; y &lt; highQualResampledImage.getHeight(); ++y)
+    for (int x = 0; x &lt; highQualResampledImage.getWidth(); ++x)
+        if (scaledDownMask.getPixelAt (x, y).getAlpha() &gt; 0)
+            maskedImage.setPixelAt (x, y, highQualResampledImage.getPixelAt (x, y));
+</code></pre>
+<p>It didn't pan out. Clipping the smooth Lanczos output against a separately-resampled, low-quality mask just trades one edge artifact for another: the hard <code>alpha &gt; 0</code> threshold on the blocky mask gives you a stair-stepped silhouette that doesn't line up with the antialiased colour edge underneath. A different flavour of wrong, not an improvement. The mask overload still exists in the resampler, but the compositing branch is commented out and the default path is plain Lanczos.</p>
+<p>The halo didn't go away; it just stopped being worth chasing. What defused it was deferred resampling (below): during the drag we're on the fast <code>stretchToFit</code> path, so there's no Lanczos and nothing shimmering along the edges while the window moves. The fringe only appears in the settled, high-quality frame after you let go, and there it's static and minor. Whatever slight offset it introduces at the edge is rarely noticeable and not jarring, which is a much lower bar than the mask composite was trying (and failing) to clear.</p>
+<h3 id="deferred-resampling">Deferred Resampling</h3>
+<p>Resampling isn't free. The Lanczos kernel is a 6-tap filter; running it on every paint for every animated knob during a live resize drag is not workable on modest hardware.</p>
+<p>So we don't. Each resampled component wraps itself in a <code>DeferredImageResampler</code> that listens for resize events. While the window is actually moving, the component paints its source frame scaled to the target rect with <code>stretchToFit</code> and lets JUCE's cheap built-in scaling carry the motion:</p>
+<pre><code class="language-cpp">g.drawImage (*images[imageIndex], floatRect,
+    juce::RectanglePlacement::stretchToFit);
+</code></pre>
+<p>Every resize event restarts a 500ms timer. When the window finally holds still and the timer fires, a job goes onto a single dedicated background thread, Lanczos-resamples each frame to the exact target size, caches the result, and repaints. From then until the next resize the component blits the pre-resampled image at 1:1 with <code>drawImageAt</code>, no scaling at all. Smooth during the drag, sharp the moment you let go.</p>
+<p>The cache is deliberately dumb: one array of resampled frames per component, discarded and rebuilt whenever the size changes. The talk demo carried a fancier version that keyed the cache on a perceptual hash of the source image, to dedupe identical frames across components without relying on the source pointer. It was a fun problem, but it never earned its complexity in a shipping plugin, so it didn't make the cut.</p>
+<h3 id="skipping-resampling-on-retina">Skipping Resampling on Retina</h3>
+<p>The other half of the story: on a high-DPI display, the entire problem goes away.</p>
+<p>JUCE exposes the display scale through <code>juce::Desktop::getInstance().getDisplays()</code>. If the component's display has <code>scale &gt; 1.0</code>, the backing surface is already higher resolution than the logical pixel size, and the native compositor handles the downscale at hardware quality. Doing software resampling on top of that is pure cost, so the resampler simply doesn't: it reads the scale and only schedules a Lanczos job when the scale is 1.0. On a Retina display the component just paints its source frame scaled by the compositor, no <code>DeferredImageResampler</code> work at all.</p>
+<p>Finding the <em>right</em> display is the fiddly part. A plugin editor lives inside whatever wrapper hierarchy the host hands it, and asking &quot;which display is this component on?&quot; doesn't always answer cleanly. The lookup falls back through several strategies (the component's centre point, then its full screen bounds, then the parent monitor area, then the top-level window) before giving up. Get it wrong and you either resample on a display that didn't need it or skip it on one that did.</p>
+<p>A few months later we shipped <code>ScaledImageSet</code> in the public loader. Each component optionally holds a 1x set and a 2x set of frames, the Photoshop exporter emits both, and the component picks the matching set at paint time based on the current display scale. This moves the cost from runtime resampling to the asset pipeline and keeps Retina users on hardware-rate downscaling of the 2x set. Smaller binary if you ship 1x only, sharper image if you ship both.</p>
+<p>Shipping both sets grows the asset payload, and on macOS you pay for it twice. JUCE's stock <code>BinaryData</code> compiles assets into the object code, so a universal (arm64 + x86_64) build embeds every byte once per architecture slice. The knob frames land in the fat binary twice over. That duplication is what pushed me to build <a href="https://github.com/playfultones/playfultones_packedassets" target="_blank" rel="noopener noreferrer">this packed assets module</a>: it packs the assets into a single archive that lives once in the binary and is shared across both slices, instead of being baked into each. It exposes a <code>BinaryData::getNamedResource</code>-compatible shim, so the <code>BinaryAssetImageLoader</code> from Part 1 takes the packed source as a drop-in swap rather than a rewrite. You keep the sharper 2x assets without the universal binary embedding them twice over.</p>
+<h2 id="did-we-actually-get-it-right">Did We Actually Get It Right?</h2>
+<p>The remaining piece of the pipeline is the part that asks: is any of the above actually working?</p>
+<p>For a long time the honest answer was &quot;I think so?&quot;, and I never liked leaving it there with no way to actually measure it. You'd resize the window, eyeball the result against the Reference Image, decide it looked right, and move on. That holds up when the UI has six components and one designer. It stops holding up once you have a dozen plugins, multiple display scales, and three resampling modes to compare.</p>
+<p>So we built a tool, and in the grand JUCE tradition of naming with questionable backronyms, we called it <strong>CRISP</strong>: Component Render Image Similarity Profiler. It's a JUCE module that captures the live running UI by snapshotting your <code>juce::Component</code>, runs full-reference image quality metrics against a designer-provided reference image, and surfaces the differences as numbers and as overlays.</p>
+<h3 id="why-eyeballing-doesnt-scale">Why Eyeballing Doesn't Scale</h3>
+<p>Naive pixel-by-pixel comparison gives you &quot;100% match&quot; or &quot;lots of differences&quot; with no useful structure in between. A 1px border at <code>(10.5, 10.5)</code> looks completely different from one at <code>(10.0, 10.0)</code> under pixel equality, even though to a human they're the same border. <strong>FR-IQA</strong> (Full Reference Image Quality Assessment) metrics exist exactly for this: they predict perceived quality rather than raw pixel agreement.</p>
+<p>We surveyed the options (SSIM, MS-SSIM, FSIM, VIF, GMSD, LPIPS, DISTS), implemented several, and shipped three.</p>
+<h3 id="ssim-gmsd-lpips">SSIM, GMSD, LPIPS</h3>
+<div class="table-responsive"><table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Metric</th>
+<th>What it captures</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSIM</td>
+<td>Local luminance, contrast, structure in a sliding window. Sensitive to structural distortion (a misplaced knob jumps out). Not great at hue shifts.</td>
+<td>Cheap with optimization.</td>
+</tr>
+<tr>
+<td>GMSD</td>
+<td>Gradient magnitude similarity, plus a per-pixel deviation map. Catches edge sharpness changes that SSIM smooths over.</td>
+<td>Cheap.</td>
+</tr>
+<tr>
+<td>LPIPS</td>
+<td>Learned perceptual metric. Feeds both images through a pretrained CNN (AlexNet) and compares feature activations. Closest to &quot;what does a human think?&quot;.</td>
+<td>Expensive. Needs Python.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Plus a homemade Weighted Match score: <code>100% - (RMS pixel difference, as a percentage)</code>. Not a sophisticated metric, but readable as a single percentage you can quote at a designer without explaining what a structural similarity index is.</p>
+<h3 id="optimizing-the-hot-path">Optimizing the Hot Path</h3>
+<p>SSIM by the textbook is slow. A naive implementation of the 11x11 Gaussian window takes about 1.6 seconds on a 1000x1000 image. For a real-time tool you need that in milliseconds.</p>
+<p>What got it there:</p>
+<ul>
+<li>Precompute the luminance map once and cache the Gaussian weights. (~10x.)</li>
+<li>Single-pass Welford-style accumulator inside the window. (Consolidated with the above.)</li>
+<li>Parallelize across a <code>juce::ThreadPool</code> by row stripes. (3-4x on big images.)</li>
+<li><code>juce::Image::BitmapData::getLinePointer()</code> for direct pixel access instead of <code>getPixelAt()</code>. (Last 10%.)</li>
+</ul>
+<p>End result on the same 1000x1000 image: about 51 milliseconds. The same lesson came up in the non-SSIM parts of the comparison engine: swapping <code>setPixelColour()</code> for direct <code>uint32_t*</code> writes when generating heatmaps shaved another 20% off, and <code>std::nth_element</code> for the median calculation (<code>O(n)</code>) replaced <code>std::sort</code> (<code>O(n log n)</code>).</p>
+<p>LPIPS is a different problem. The Python POC (PyTorch + MPS on Apple Silicon) ran a 2430x1600 image through SqueezeNet in around 214ms, missing the 150ms target. The fix was a 1080p downsample before the call, which got us to about 118ms. LPIPS doesn't need full-resolution input to give a useful perceptual score. The complete SSIM + GMSD + LPIPS pipeline ended up at about 183ms total, under the 200ms target.</p>
+<p>Then there was the model load problem. First-run LPIPS spent 3.75 seconds loading model weights. Cached runs spent 35ms. Subprocess-per-call would have paid the load cost every time. The fix was to run the Python interpreter once as a persistent subprocess with line-delimited JSON over pipes, keep the model resident, and pay the load cost once when the tool starts. Boring infrastructure work that turns &quot;unusable&quot; into &quot;interactive.&quot;</p>
+<h3 id="the-real-time-architecture">The Real-Time Architecture</h3>
+<p>JUCE makes the live capture trivial. The whole snapshot primitive is this:</p>
+<pre><code class="language-cpp">juce::Image MainComponent::captureComponentSnapshot (juce::Component* comp)
+{
+    auto bounds = comp-&gt;getLocalBounds();
+    if (bounds.isEmpty())
+        return {};
+
+    juce::Image snapshot (juce::Image::ARGB,
+                          bounds.getWidth(), bounds.getHeight(), true);
+    juce::Graphics g (snapshot);
+    comp-&gt;paintEntireComponent (g, false);
+    return snapshot;
+}
+</code></pre>
+<p><code>paintEntireComponent</code> walks the component tree exactly as it would on the way to the screen, but into a <code>juce::Graphics</code> backed by an off-screen <code>juce::Image::ARGB</code>. No OS-level screen capture, no GPU readback, no platform-specific permissions. JUCE's own renderer is the snapshot service.</p>
+<p>A <code>juce::Timer</code> fires at a configurable rate (1-60Hz, default 5) and pushes each captured frame plus the reference image into a <code>ComparisonEngine</code>. Each metric runs as its own <code>juce::ThreadPoolJob</code>, so the panel can show SSIM and GMSD numbers within a few milliseconds while LPIPS catches up. The result struct tracks each metric's state independently (<code>NotCalculated</code>, <code>Calculating</code>, <code>Available</code>, <code>Failed</code>), and the UI updates per-metric instead of waiting for the slowest one.</p>
+<p>The default capture rate is itself a tell. SSIM + GMSD + LPIPS at full bandwidth is too much to run on every frame of an interactive resize. 5Hz gives the user roughly two updates per second of active interaction, which is enough to see whether the implementation is tracking the reference. A manual &quot;Compare&quot; button is the escape hatch for cases where you want a precise snapshot at a known window size.</p>
+<p>Captured frames can also be recorded to disk as PNGs through a separate <code>recordingThreadPool</code>. We use this to drive the UI through animations and parameter sweeps offline and review the frames against the reference in batch. The four-way evaluation that produced our verdict on the resize approaches was a recording session like this.</p>
+<h3 id="what-pixel-perfect-actually-means">What Pixel-Perfect Actually Means</h3>
+<p>Three things became clearer once we had numbers instead of intuition.</p>
+<p>The metrics don't always agree, and that's useful. SSIM fine, GMSD bad, LPIPS fine: probably an edge-sharpness regression that the other two are too blurry to catch. SSIM bad, GMSD fine: probably a structural difference, something is in the wrong place. All three bad: actually broken, go fix.</p>
+<p>The per-pixel maps matter more than the scalar scores. A 96.84% Weighted Match could be uniform 3% noise across the whole image, or it could be a 60% error on a 5% region (a missing LED highlight, say). The heatmap tells you which. We render the GMSD gradient map as an overlay on top of the snapshot, in the same coordinate system, so you can point at the bright region and say &quot;that's the bit that broke.&quot;</p>
+<p>Full pixel agreement is not the goal at all scales. At some scales an antialiased edge will pick a different alpha than the reference even with the best resampler, the metrics will hate it, and humans won't notice. &quot;Good enough&quot; is a judgement call informed by the metrics, not a number you lock in once and forget. CRISP is the dashboard. The decision is still yours.</p>
+<h2 id="closing">Closing</h2>
+<p>If you're starting a similar project: do the sub-pixel layout work early. It's the lowest-effort, highest-payoff change in this whole post. Don't try to fix resampling quality with a container transform; fix the underlying image draw path. Build the evaluation tool sooner than you think you need it. The first time it catches a regression you didn't see is the moment it pays for itself.</p>
+<p>The public modules and the slides are at <a href="https://github.com/Bogren-Digital/PSD-to-DAW" target="_blank" rel="noopener noreferrer">github.com/Bogren-Digital/PSD-to-DAW</a>. The UI loader is at <a href="https://github.com/Bogren-Digital/bd_ui_loader" target="_blank" rel="noopener noreferrer">bd_ui_loader</a>. The Photoshop exporter is at <a href="https://github.com/Bogren-Digital/skeuomorphic-ui-exporter" target="_blank" rel="noopener noreferrer">skeuomorphic-ui-exporter</a>. Issues and PRs welcome on any of them.</p>
+<h2 id="glossary">Glossary</h2>
+<div class="table-responsive"><table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fractional Offset Layout</td>
+<td>Our resize strategy: set each component's integer bounds to the smallest rectangle that fully contains the float-precise target rect (<code>floor</code> for top-left, <code>ceil</code> for bottom-right), and stash the float rect itself in the component properties. The component reads the float rect at paint time and draws its image into it with <code>drawImage(image, floatRect, stretchToFit)</code>. JUCE handles the sub-pixel placement during rasterization. No per-component transform, no container transform.</td>
+</tr>
+<tr>
+<td>Deferred Resampling</td>
+<td>Skip the expensive Lanczos pass while the window is being resized, then re-resample once the size holds still for 500ms. Combined with the per-component cache, the user gets smooth motion during the drag (cheap <code>stretchToFit</code> scaling) and a sharp image on release.</td>
+</tr>
+<tr>
+<td>ScaledImageSet</td>
+<td>A container that holds both 1x and 2x versions of an animation frame set. Picks the right set based on the display's scale factor at paint time. Lets you skip software resampling entirely on Retina-class displays.</td>
+</tr>
+<tr>
+<td>FR-IQA</td>
+<td>Full Reference Image Quality Assessment. A family of metrics that predict perceived image quality by comparing an image against a known reference. Distinct from no-reference metrics (which judge an image in isolation) and reduced-reference metrics (which use partial information about the reference).</td>
+</tr>
+<tr>
+<td>CRISP</td>
+<td>Component Render Image Similarity Profiler. A JUCE-based tool that snapshots a live <code>juce::Component</code> via <code>paintEntireComponent</code> and runs SSIM, GMSD, and LPIPS against a designer-provided reference image. Renders the metric maps as overlays so you can see where the implementation diverges from the design, not just by how much.</td>
+</tr>
+<tr>
+<td>Weighted Match</td>
+<td>A homemade summary score: <code>100% - (RMS pixel difference, as a percentage)</code>. Not a sophisticated metric, but readable as a single percentage you can quote at a designer.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+                <div class="entry-footer">
+                  <i class="bi bi-tags"></i>
+                  <ul class="tags">
+                    <li><a href="/blog/tags/c">C++</a></li>
+<li><a href="/blog/tags/juce">JUCE</a></li>
+<li><a href="/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="/blog/tags/adc">ADC</a></li>
+                  </ul>
+                </div>
+              </article>
+              <!-- End blog entry -->
+
+              <div class="blog-author d-flex align-items-center">
+                <img
+                  src="img/blog-author-wide.webp"
+                  class="rounded-circle float-left"
+                  alt=""
+                />
+                <div>
+                  <h4>Bence Kovács</h4>
+                  <div class="social-links"><a href="https://www.linkedin.com/in/bencekovacs27/"><i class="bi bi-linkedin"></i></a></div>
+                  <p>Bence is a software developer specializing in audio and game development. He has contributed to a wide array of projects, ranging from audio plugins to games and VR experiences. Fueled by his passion for music and technology, he is continually drawn to the innovative blend of gamified interfaces within the realm of music production.</p>
+                </div>
+              </div>
+              <!-- End blog author bio -->
+            </div>
+            <!-- End blog entries list -->
+
+            <div class="col-lg-4">
+              <div class="sidebar">
+                <h3 class="sidebar-title">Recent Posts</h3>
+                <div class="sidebar-item recent-posts"><div class="post-item clearfix">
+            <img src="/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-2">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 2</a>
+            </h4>
+            <time datetime="2026-05-29">May 29, 2026</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="/blog/img/adc2025talk.webp" alt="">
+            <h4>
+                <a href="/blog/reflections-on-building-a-pixel-perfect-ui-pipeline-in-juce-applications---part-1">Reflections on Building a Pixel-Perfect UI Pipeline in JUCE Applications - Part 1</a>
+            </h4>
+            <time datetime="2025-12-02">December 02, 2025</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="/blog/img/computer_problems.webp" alt="">
+            <h4>
+                <a href="/blog/navigating-template-instantiation-woes-in-static-libraries">Navigating Template Instantiation Woes in Static Libraries</a>
+            </h4>
+            <time datetime="2024-12-11">December 11, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="/blog/img/juce-initialisation.webp" alt="">
+            <h4>
+                <a href="/blog/loading-juce-plugins-in-android-unity-projects-the-right-way">Loading JUCE Plugins in Android Unity Projects the right way</a>
+            </h4>
+            <time datetime="2024-06-03">June 03, 2024</time>
+        </div>
+<div class="post-item clearfix">
+            <img src="/blog/img/android-unity.webp" alt="">
+            <h4>
+                <a href="/blog/building-juce-plugins-for-android-unity-projects-with-a-native-message-queue">Building JUCE Plugins for Android Unity Projects, with a native message queue</a>
+            </h4>
+            <time datetime="2024-02-26">February 26, 2024</time>
+        </div></div>
+                <!-- End sidebar recent posts-->
+
+                <h3 class="sidebar-title">Tags</h3>
+                <div class="sidebar-item tags">
+                  <ul>
+                    <li><a href="/blog/tags/juce">JUCE</a></li>
+<li><a href="/blog/tags/unity">Unity</a></li>
+<li><a href="/blog/tags/ios">iOS</a></li>
+<li><a href="/blog/tags/game-audio">Game Audio</a></li>
+<li><a href="/blog/tags/c">C++</a></li>
+<li><a href="/blog/tags/gui-programming">GUI Programming</a></li>
+<li><a href="/blog/tags/production-workflows">Production Workflows</a></li>
+<li><a href="/blog/tags/adc">ADC</a></li>
+<li><a href="/blog/tags/android">Android</a></li>
+<li><a href="/blog/tags/one-definition-rule">One Definition Rule</a></li>
+<li><a href="/blog/tags/templates">Templates</a></li>
+<li><a href="/blog/tags/static-libraries">Static Libraries</a></li>
+                  </ul>
+                </div>
+                <!-- End sidebar tags-->
+              </div>
+            </div>
+            <!-- End sidebar -->
+          </div>
+          <!-- End blog sidebar -->
+        </div>
+      </section>
+      <!-- End Blog Single Section -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer"><div class="container d-md-flex py-4">
+    <div class="me-md-auto text-center text-md-start">
+        <div class="copyright">
+            &copy; Copyright <strong><span>Playful Tones</span></strong> 2023 -
+            2026. All Rights Reserved
+        </div>
+    </div>
+</div>
+</footer>
+    <!-- End Footer -->
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+
+    <!-- Vendor JS Files -->
+    <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="/assets/vendor/php-email-form/validate.js"></script>
+    <script src="/assets/vendor/highlight/highlight.min.js"></script>
+    <script>
+      hljs.configure({ cssSelector: "code" });
+      hljs.highlightAll();
+    </script>
+
+    <!-- Main JS File -->
+    <script src="/assets/js/main.js"></script>
+
+    <!-- Header Anchor Copy Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headers = document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]');
+
+        headers.forEach(header => {
+          const anchor = document.createElement('a');
+          anchor.href = '#' + header.id;
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          anchor.title = 'Copy link to this section';
+          anchor.style.cssText = 'margin-left: 0.5rem; opacity: 0.5; text-decoration: none; font-size: 0.8em;';
+
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + '#' + header.id;
+            navigator.clipboard.writeText(url).then(() => {
+              const originalHTML = anchor.innerHTML;
+              anchor.innerHTML = '<i class="bi bi-check2"></i>';
+              anchor.style.opacity = '1';
+              setTimeout(() => {
+                anchor.innerHTML = originalHTML;
+                anchor.style.opacity = '0.5';
+              }, 2000);
+            });
+          });
+
+          anchor.addEventListener('mouseenter', function() {
+            anchor.style.opacity = '1';
+          });
+
+          anchor.addEventListener('mouseleave', function() {
+            if (!anchor.innerHTML.includes('check2')) {
+              anchor.style.opacity = '0.5';
+            }
+          });
+
+          header.appendChild(anchor);
+        });
+      });
+    </script>
+  </body>
+</html>
